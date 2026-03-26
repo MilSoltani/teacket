@@ -1,0 +1,10 @@
+shellEmulator: true
+
+trustPolicy: no-downgrade
+
+packages:
+  - api
+  - web
+
+onlyBuiltDependencies:
+  - esbuild
