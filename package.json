@@ -11,7 +11,11 @@
     "dev": "pnpm -r dev",
     "lint": "eslint",
     "lint:fix": "eslint --fix",
-    "prepare": "husky"
+    "prepare": "husky",
+    "generate": "cd ./api && npx drizzle-kit generate",
+    "migrate": "cd ./api && npx drizzle-kit migrate",
+    "push": "cd ./api && npx drizzle-kit push",
+    "studio": "cd ./api && npx drizzle-kit studio"
   },
   "devDependencies": {
     "@antfu/eslint-config": "^7.7.3",
