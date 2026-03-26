@@ -15,26 +15,39 @@ export const usersTable = pgTable('users', {
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
 })
 
+/* zod schemas ------- */
+
 export const UserSelectSchema = createSelectSchema(usersTable)
   .omit({ password: true })
   .openapi('User')
 
 export const UserInsertSchema = createSelectSchema(usersTable, {
-  username: s =>
-    s.min(5).max(255).openapi({ example: 'aronald' }),
-  password: s =>
-    s.min(8).max(255).openapi({ example: 'secure_password_123' }),
-  firstName: s =>
-    s.min(1).max(255).openapi({ example: 'Adam' }),
-  lastName: s =>
-    s.min(1).max(255).openapi({ example: 'Ronald' }),
-  email: s =>
-    s.email().openapi({ example: 'a.ronald@example.com' }),
+  username: z.string().min(5).max(255).openapi({ example: 'aronald' }),
+  password: z.string().min(8).max(255).openapi({ example: 'secure_password_123' }),
+  firstName: z.string().min(1).max(255).openapi({ example: 'Adam' }),
+  lastName: z.string().min(1).max(255).openapi({ example: 'Ronald' }),
+  email: z.email().openapi({ example: 'a.ronald@example.com' }),
 }).omit({
+  id: true,
   createdAt: true,
   updatedAt: true,
 }).openapi('UserInsert')
 
-export const UserUpdateSchema = UserInsertSchema.extend({
-  password: (s: any) => s.min(8).max(255).openapi({ example: 'secure_password_123' }),
-}).openapi('UserUpdate')
+export const UserUpdateSchema = UserInsertSchema.partial()
+  .openapi('UserUpdate')
+
+export const publicColumns = {
+  id: usersTable.id,
+  username: usersTable.username,
+  firstName: usersTable.firstName,
+  lastName: usersTable.lastName,
+  email: usersTable.email,
+  createdAt: usersTable.createdAt,
+  updatedAt: usersTable.updatedAt,
+}
+
+/* types --------- */
+
+export type User = z.infer<typeof UserSelectSchema>
+export type UserInsertPayload = z.infer<typeof UserInsertSchema>
+export type UserUpdatePayload = z.infer<typeof UserUpdateSchema>
