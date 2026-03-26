@@ -8,15 +8,19 @@
   "keywords": [],
   "main": "index.js",
   "scripts": {
-    "dev": "tsx watch src/main.ts"
+    "dev": "tsx watch --env-file=.env src/main.ts",
+    "debug": "tsx --inspect=9229 --env-file=.env src/index.ts"
+
   },
   "dependencies": {
     "@hono/node-server": "^1.19.11",
+    "@hono/swagger-ui": "^0.6.1",
     "@hono/zod-openapi": "^1.2.3",
     "drizzle-orm": "^0.45.1",
     "drizzle-zod": "^0.8.3",
     "hono": "^4.12.9",
-    "pg": "^8.20.0"
+    "pg": "^8.20.0",
+    "zod": "^4.3.6"
   },
   "devDependencies": {
     "@types/node": "^25.5.0",

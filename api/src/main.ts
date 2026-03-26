@@ -1,9 +1,31 @@
+import type { AppEnvironment } from './lib/types'
 import { serve } from '@hono/node-server'
-import { Hono } from 'hono'
+import { swaggerUI } from '@hono/swagger-ui'
+import { OpenAPIHono } from '@hono/zod-openapi'
+import { logger } from 'hono/logger'
+import { handleErrors } from './lib/errors'
+import { userHandler } from './users/user.handler'
 
-const app = new Hono()
+const app = new OpenAPIHono<AppEnvironment>()
+
+app.use(logger())
 
 app.get('/api/health', c => c.json({ ok: true }))
+
+app.route('/users', userHandler)
+
+app.onError(handleErrors)
+app.notFound(c => c.json({ message: 'Not Found' }, 404))
+
+app.doc('/doc', {
+  openapi: '3.0.0',
+  info: {
+    title: 'Teacket API',
+    version: '1.0.0',
+  },
+})
+
+app.get('/ui', swaggerUI({ url: '/doc' }))
 
 serve({
   fetch: app.fetch,

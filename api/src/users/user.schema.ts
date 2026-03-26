@@ -7,7 +7,7 @@ extendZodWithOpenApi(z)
 export const usersTable = pgTable('users', {
   id: integer().primaryKey().generatedAlwaysAsIdentity(),
   username: varchar({ length: 255 }).notNull().unique(),
-  password: varchar({ length: 255 }).notNull(),
+  password: varchar({ length: 255 }),
   firstName: varchar({ length: 255 }).notNull(),
   lastName: varchar({ length: 255 }).notNull(),
   email: varchar({ length: 255 }).notNull().unique(),
@@ -22,18 +22,19 @@ export const UserSelectSchema = createSelectSchema(usersTable)
   .openapi('User')
 
 export const UserInsertSchema = createSelectSchema(usersTable, {
-  username: z.string().min(5).max(255).openapi({ example: 'aronald' }),
-  password: z.string().min(8).max(255).openapi({ example: 'secure_password_123' }),
-  firstName: z.string().min(1).max(255).openapi({ example: 'Adam' }),
-  lastName: z.string().min(1).max(255).openapi({ example: 'Ronald' }),
-  email: z.email().openapi({ example: 'a.ronald@example.com' }),
+  username: z.string().min(5).max(255),
+  firstName: z.string().min(1).max(255),
+  lastName: z.string().min(1).max(255),
+  email: z.email(),
 }).omit({
   id: true,
+  password: true,
   createdAt: true,
   updatedAt: true,
 }).openapi('UserInsert')
 
-export const UserUpdateSchema = UserInsertSchema.partial()
+export const UserUpdateSchema = UserInsertSchema
+  .partial()
   .openapi('UserUpdate')
 
 export const publicColumns = {
