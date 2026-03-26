@@ -1,7 +1,8 @@
 <script setup lang="ts">
-import HelloWorld from './components/HelloWorld.vue'
+import {UserClient} from '@teacket/api/clients'
+
+UserClient.index.$get()
 </script>
 
 <template>
-  <HelloWorld />
 </template>
