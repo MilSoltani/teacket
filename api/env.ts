@@ -1,14 +1,10 @@
-function requireEnv(key: string): string {
-  // eslint-disable-next-line node/prefer-global/process
-  const value = process.env[key]
+import { z } from 'zod'
 
-  if (!value)
-    throw new Error(`Missing required environment variable: ${key}`)
+const envSchema = z.object({
+  NODE_ENV: z.enum(['development', 'production', 'test']),
+  DATABASE_URL: z.string(),
+  REFRESH_TOKEN_EXPIRY: z.coerce.number(),
+})
 
-  return value
-}
-
-export const env = {
-  NODE_ENV: requireEnv('NODE_ENV'),
-  DATABASE_URL: requireEnv('DATABASE_URL'),
-} as const
+// eslint-disable-next-line node/prefer-global/process
+export const env = envSchema.parse(process.env)
