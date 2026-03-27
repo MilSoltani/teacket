@@ -1,6 +1,6 @@
+import { env } from '@api/../env'
 import * as schema from '@api/database/schema'
 import { drizzle } from 'drizzle-orm/node-postgres'
-import { env } from 'env'
 import { Pool } from 'pg'
 
 export const pool = new Pool({

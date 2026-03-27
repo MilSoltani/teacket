@@ -1,5 +1,5 @@
 import type { UserInsertPayload, UserUpdatePayload } from './user.schema'
-import { NotFoundError } from '@api/lib/errors'
+import { NotFoundException } from '@api/lib/errors'
 import { UserRepository } from './user.repository'
 
 export const UserService = {
@@ -13,7 +13,7 @@ export const UserService = {
     const result = await UserRepository.getById(id)
 
     if (!result)
-      throw new NotFoundError('User')
+      throw new NotFoundException('User')
 
     return result
   },
@@ -28,7 +28,7 @@ export const UserService = {
     const result = await UserRepository.update(id, data)
 
     if (!result)
-      throw new NotFoundError('User')
+      throw new NotFoundException('User')
 
     return result
   },
@@ -37,6 +37,6 @@ export const UserService = {
     const result = await UserRepository.delete(id)
 
     if (!result)
-      throw new NotFoundError('User')
+      throw new NotFoundException('User')
   },
 }

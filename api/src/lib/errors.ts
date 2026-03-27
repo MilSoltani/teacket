@@ -8,7 +8,7 @@ export const ErrorSchema = z.object({
   message: z.string(),
 })
 
-export class NotFoundError extends HTTPException {
+export class NotFoundException extends HTTPException {
   constructor(resource: string) {
     super(404, { message: `${resource} not found` })
   }
