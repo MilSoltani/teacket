@@ -1,6 +1,6 @@
 import { extendZodWithOpenApi, z } from '@hono/zod-openapi'
 import { integer, pgTable, timestamp, varchar } from 'drizzle-orm/pg-core'
-import { createSelectSchema } from 'drizzle-zod'
+import { createInsertSchema, createSelectSchema } from 'drizzle-zod'
 
 extendZodWithOpenApi(z)
 
@@ -21,13 +21,12 @@ export const UserSelectSchema = createSelectSchema(usersTable)
   .omit({ password: true })
   .openapi('User')
 
-export const UserInsertSchema = createSelectSchema(usersTable, {
+export const UserInsertSchema = createInsertSchema(usersTable, {
   username: z.string().min(5).max(255),
   firstName: z.string().min(1).max(255),
   lastName: z.string().min(1).max(255),
   email: z.email(),
 }).omit({
-  id: true,
   password: true,
   createdAt: true,
   updatedAt: true,
