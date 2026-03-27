@@ -13,17 +13,24 @@ vi.mock('@api/../env', () => ({
   },
 }))
 
-let testClient: PGlite
-let db: any
+const sharedState = vi.hoisted(() => ({
+  testClient: null as unknown as PGlite,
+  db: null as any,
+}))
 
 vi.mock('@api/database', async (importOriginal) => {
-  testClient = new PGlite()
-  db = drizzle(testClient, { schema })
+  const original = await importOriginal<typeof import('@api/database')>()
+
   return {
-    ...(await importOriginal<typeof import('@api/database')>()),
-    db,
+    ...original,
+    get db() {
+      return sharedState.db
+    },
   }
 })
+
+sharedState.testClient = new PGlite()
+sharedState.db = drizzle(sharedState.testClient, { schema })
 
 const isIntegrationTest = () => expect.getState().testPath?.endsWith('.int.test.ts')
 
@@ -32,25 +39,26 @@ beforeAll(async () => {
     return
 
   const migrationsFolder = path.resolve(__dirname, './drizzle')
-  await migrate(db, { migrationsFolder })
+  await migrate(sharedState.db, { migrationsFolder })
 })
 
 beforeEach(async () => {
   if (!isIntegrationTest())
     return
 
-  const tables = await db.execute(sql`
+  const tables = await sharedState.db.execute(sql`
     select tablename from pg_tables 
     where schemaname = 'public' 
     and tablename not like '__drizzle_migrations%'
   `)
 
   for (const { tablename } of tables.rows as Array<{ tablename: string }>) {
-    await db.execute(sql.raw(`truncate table "${tablename}" cascade`))
+    await sharedState.db.execute(sql.raw(`truncate table "${tablename}" cascade`))
   }
 })
 
 afterAll(async () => {
-  if (testClient)
-    await testClient.close()
+  if (sharedState.testClient) {
+    await sharedState.testClient.close()
+  }
 })
