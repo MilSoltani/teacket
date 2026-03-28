@@ -1,6 +1,6 @@
-import type { UserInsertPayload, UserUpdatePayload } from './user.schema'
+import type { UserInsertPayload, UserUpdatePayload } from '@api/users/user.schema'
 import { NotFoundException } from '@api/lib/errors'
-import { UserRepository } from './user.repository'
+import { UserRepository } from '@api/users/user.repository'
 
 export const UserService = {
   async getAll() {
@@ -38,5 +38,7 @@ export const UserService = {
 
     if (!result)
       throw new NotFoundException('User')
+
+    return result
   },
 }
