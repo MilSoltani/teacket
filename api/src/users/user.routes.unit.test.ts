@@ -25,4 +25,21 @@ describe('route definitions', () => {
     expect(UserRoutes.create.tags).toContain('User')
     expect(UserRoutes.delete.tags).toContain('User')
   })
+
+  describe('response codes', () => {
+    const routeResponses = {
+      getAll: ['200'],
+      getById: ['200', '404'],
+      create: ['201', '400', '409'],
+      update: ['200', '400', '404'],
+      delete: ['204', '404'],
+    }
+
+    for (const [routeName, codes] of Object.entries(routeResponses)) {
+      it(`${routeName} should have correct response codes`, () => {
+        const responses = (UserRoutes as any)[routeName].responses
+        codes.forEach(code => expect(responses).toHaveProperty(code))
+      })
+    }
+  })
 })
