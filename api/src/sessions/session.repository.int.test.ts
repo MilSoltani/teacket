@@ -21,15 +21,20 @@ describe('sessionsRepository', () => {
 
     session_1 = {
       userId,
+      ipAddress: '192.168.1.10',
+      userAgent: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)',
       refreshTokenHash: 'XYZSECRETSVERYIMPORTANT1',
       expiresAt: new Date(),
     }
 
     session_2 = {
       userId,
+      ipAddress: '10.0.0.5',
+      userAgent: 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X)',
       refreshTokenHash: 'XYZSECRETSVERYIMPORTANT2',
       expiresAt: new Date(),
     }
+
     vi.clearAllMocks()
   })
 

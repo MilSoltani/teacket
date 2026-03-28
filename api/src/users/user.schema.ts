@@ -41,8 +41,15 @@ export const publicColumns = {
   updatedAt: usersTable.updatedAt,
 }
 
+export const UserBaseSchema = UserSelectSchema.omit({
+  email: true,
+  createdAt: true,
+  updatedAt: true,
+})
+
 /* types --------- */
 
 export type User = z.infer<typeof UserSelectSchema>
 export type UserInsertPayload = z.infer<typeof UserInsertSchema>
 export type UserUpdatePayload = z.infer<typeof UserUpdateSchema>
+export type UserBase = z.infer<typeof UserBaseSchema>
