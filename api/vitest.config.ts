@@ -5,8 +5,21 @@ export default defineConfig({
   test: {
     environment: 'node',
     globals: true,
-    include: ['**/*.test.ts'],
-    setupFiles: ['./vitest.setup.ts'],
+    projects: [
+      {
+        extends: true,
+        test: {
+          include: ['**/*.int.test.ts'],
+          setupFiles: ['./vitest.setup.ts'],
+        },
+      },
+      {
+        extends: true,
+        test: {
+          include: ['**/*.unit.test.ts'],
+        },
+      },
+    ],
   },
   resolve: {
     alias: {

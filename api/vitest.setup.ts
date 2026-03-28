@@ -4,7 +4,7 @@ import { PGlite } from '@electric-sql/pglite'
 import { sql } from 'drizzle-orm'
 import { drizzle } from 'drizzle-orm/pglite'
 import { migrate } from 'drizzle-orm/pglite/migrator'
-import { afterAll, beforeAll, beforeEach, expect, vi } from 'vitest'
+import { afterAll, beforeAll, beforeEach, vi } from 'vitest'
 
 vi.mock('@api/../env', () => ({
   env: {
@@ -32,20 +32,12 @@ vi.mock('@api/database', async (importOriginal) => {
 sharedState.testClient = new PGlite()
 sharedState.db = drizzle(sharedState.testClient, { schema })
 
-const isIntegrationTest = () => expect.getState().testPath?.endsWith('.int.test.ts')
-
 beforeAll(async () => {
-  if (!isIntegrationTest())
-    return
-
   const migrationsFolder = path.resolve(__dirname, './drizzle')
   await migrate(sharedState.db, { migrationsFolder })
 })
 
 beforeEach(async () => {
-  if (!isIntegrationTest())
-    return
-
   const tables = await sharedState.db.execute(sql`
     select tablename from pg_tables 
     where schemaname = 'public' 
