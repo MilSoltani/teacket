@@ -19,18 +19,19 @@ export const usersTable = pgTable('users', {
 
 export const UserSelectSchema = createSelectSchema(usersTable)
   .omit({ password: true })
+  .strict()
   .openapi('User')
 
 export const UserInsertSchema = createInsertSchema(usersTable, {
   username: z.string().min(5).max(255),
   firstName: z.string().min(1).max(255),
   lastName: z.string().min(1).max(255),
-  email: z.email(),
+  email: z.email().min(5).max(255),
 }).omit({
   password: true,
   createdAt: true,
   updatedAt: true,
-}).openapi('UserInsert')
+}).strict().openapi('UserInsert')
 
 export const UserUpdateSchema = UserInsertSchema
   .partial()
