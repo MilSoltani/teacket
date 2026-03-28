@@ -9,8 +9,6 @@ describe('sessionsRepository', () => {
 
   const USER_1: UserInsertPayload = {
     username: 'badams',
-    firstName: 'brian',
-    lastName: 'adams',
     email: 'badams@mail.com',
   }
 

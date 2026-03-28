@@ -20,8 +20,6 @@ describe('userService', () => {
   const USER_1: User = {
     id: 1,
     username: 'badams',
-    firstName: 'brian',
-    lastName: 'adams',
     email: 'badams@mail.com',
     createdAt: new Date(),
     updatedAt: new Date(),
@@ -30,8 +28,6 @@ describe('userService', () => {
   const USER_2: User = {
     id: 2,
     username: 'jsmith',
-    firstName: 'john',
-    lastName: 'smith',
     email: 'jsmith@mail.com',
     createdAt: new Date(),
     updatedAt: new Date(),
@@ -87,22 +83,22 @@ describe('userService', () => {
 
   describe('update', () => {
     it('updates user when found', async () => {
-      const firstName = 'brian'
+      const email = 'test@test.com'
 
       vi.mocked(UserRepository.update).mockResolvedValue(USER_1)
 
-      const result = await UserService.update(1, { firstName })
+      const result = await UserService.update(1, { email })
 
-      expect(UserRepository.update).toHaveBeenCalledWith(1, { firstName })
+      expect(UserRepository.update).toHaveBeenCalledWith(1, { email })
       expect(result).toEqual(USER_1)
     })
 
     it('throws when user does not exist', async () => {
       vi.mocked(UserRepository.update).mockResolvedValue(undefined)
 
-      const firstName = 'brian'
+      const email = 'mail@test.test'
 
-      await expect(UserService.update(NON_EXISTENT_USER_ID, { firstName }))
+      await expect(UserService.update(NON_EXISTENT_USER_ID, { email }))
         .rejects
         .toThrow(NotFoundException)
     })

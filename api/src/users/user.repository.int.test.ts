@@ -7,15 +7,11 @@ describe('usersRepository', () => {
 
   const USER_1: UserInsertPayload = {
     username: 'badams',
-    firstName: 'brian',
-    lastName: 'adams',
     email: 'badams@mail.com',
   }
 
   const USER_2: UserInsertPayload = {
     username: 'jsmith',
-    firstName: 'john',
-    lastName: 'smith',
     email: 'jsmith@mail.com',
   }
 
@@ -86,8 +82,6 @@ describe('usersRepository', () => {
 
       expect(result).toBeDefined()
       expect(result!.username).toBe(u1!.username)
-      expect(result!.firstName).toBe(u1!.firstName)
-      expect(result!.lastName).toBe(u1!.lastName)
       expect(result!.email).toBe(u1!.email)
     })
 
@@ -104,8 +98,6 @@ describe('usersRepository', () => {
 
     it('fails on invalid input', async () => {
       const USER = {
-        firstName: 'brian',
-        lastName: 'adams',
         email: 'badams@mail.com',
       }
 
@@ -131,40 +123,34 @@ describe('usersRepository', () => {
     it('updates fields correctly', async () => {
       const u1 = await UserRepository.create(USER_1)
 
-      const newFirstName = 'George'
       const newEmail = 'george@mail.com'
 
       const updatedUser = await UserRepository.update(u1!.id, {
-        firstName: newFirstName,
         email: newEmail,
       })
 
-      expect(updatedUser!.firstName).toEqual(newFirstName)
       expect(updatedUser!.email).toEqual(newEmail)
     })
 
     it('does not overwrite unspecified fields', async () => {
       const u1 = await UserRepository.create(USER_1)
 
-      const newFirstName = 'George'
       const newEmail = 'george@mail.com'
 
       const updatedUser = await UserRepository.update(u1!.id, {
-        firstName: newFirstName,
         email: newEmail,
       })
 
-      expect(updatedUser!.lastName).toEqual(u1!.lastName)
       expect(updatedUser!.createdAt).toEqual(u1!.createdAt)
     })
 
     it('updates updatedAt', async () => {
       const u1 = await UserRepository.create(USER_1)
 
-      const newFirstName = 'George'
+      const newEmail = 'George'
 
       const updatedUser = await UserRepository.update(u1!.id, {
-        firstName: newFirstName,
+        email: newEmail,
       })
 
       expect(updatedUser!.updatedAt).not.toEqual(u1!.updatedAt)
@@ -173,7 +159,7 @@ describe('usersRepository', () => {
     it('returns empty array when no user exist', async () => {
       const updatedUser = await UserRepository.update(
         NON_EXISTENT_USER_ID,
-        { firstName: 'newFirstName' },
+        { email: 'newEmail' },
       )
 
       expect(updatedUser).toBeUndefined()

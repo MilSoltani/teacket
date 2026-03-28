@@ -8,8 +8,6 @@ export const usersTable = pgTable('users', {
   id: integer().primaryKey().generatedAlwaysAsIdentity(),
   username: varchar({ length: 255 }).notNull().unique(),
   password: varchar({ length: 255 }),
-  firstName: varchar({ length: 255 }).notNull(),
-  lastName: varchar({ length: 255 }).notNull(),
   email: varchar({ length: 255 }).notNull().unique(),
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
@@ -24,8 +22,6 @@ export const UserSelectSchema = createSelectSchema(usersTable)
 
 export const UserInsertSchema = createInsertSchema(usersTable, {
   username: z.string().min(5).max(255),
-  firstName: z.string().min(1).max(255),
-  lastName: z.string().min(1).max(255),
   email: z.email().min(5).max(255),
 }).omit({
   password: true,
@@ -40,8 +36,6 @@ export const UserUpdateSchema = UserInsertSchema
 export const publicColumns = {
   id: usersTable.id,
   username: usersTable.username,
-  firstName: usersTable.firstName,
-  lastName: usersTable.lastName,
   email: usersTable.email,
   createdAt: usersTable.createdAt,
   updatedAt: usersTable.updatedAt,

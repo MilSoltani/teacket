@@ -6,8 +6,6 @@ describe('userSchema', () => {
     it('accepts valid payload', () => {
       const payload = {
         username: 'adams1',
-        firstName: 'brian',
-        lastName: 'adams',
         email: 'adams@mail.com',
       }
 
@@ -28,52 +26,6 @@ describe('userSchema', () => {
         it(`${valid ? 'accepts' : 'rejects'} username ${desc}`, () => {
           const payload = {
             username,
-            firstName: 'Brian',
-            lastName: 'Adams',
-            email: 'adams@mail.com',
-          }
-          const result = UserInsertSchema.safeParse(payload)
-          expect(result.success).toBe(valid)
-        })
-      })
-    })
-
-    describe('firstName boundaries', () => {
-      const tests = [
-        { firstName: '', valid: false, desc: 'shorter than 1 char' },
-        { firstName: 'a', valid: true, desc: 'exactly 1 chars' },
-        { firstName: 'a'.repeat(255), valid: true, desc: 'exactly 255 chars' },
-        { firstName: 'a'.repeat(256), valid: false, desc: 'longer than 255 chars' },
-      ]
-
-      tests.forEach(({ firstName, valid, desc }) => {
-        it(`${valid ? 'accepts' : 'rejects'} firstName ${desc}`, () => {
-          const payload = {
-            firstName,
-            username: 'badams',
-            lastName: 'Adams',
-            email: 'adams@mail.com',
-          }
-          const result = UserInsertSchema.safeParse(payload)
-          expect(result.success).toBe(valid)
-        })
-      })
-    })
-
-    describe('lastName boundaries', () => {
-      const tests = [
-        { lastName: '', valid: false, desc: 'shorter than 1 char' },
-        { lastName: 'a', valid: true, desc: 'exactly 1 chars' },
-        { lastName: 'a'.repeat(255), valid: true, desc: 'exactly 255 chars' },
-        { lastName: 'a'.repeat(256), valid: false, desc: 'longer than 255 chars' },
-      ]
-
-      tests.forEach(({ lastName, valid, desc }) => {
-        it(`${valid ? 'accepts' : 'rejects'} lastName ${desc}`, () => {
-          const payload = {
-            lastName,
-            username: 'badams',
-            firstName: 'brian',
             email: 'adams@mail.com',
           }
           const result = UserInsertSchema.safeParse(payload)
@@ -104,8 +56,6 @@ describe('userSchema', () => {
         it(`${valid ? 'accepts' : 'rejects'} email ${desc}`, () => {
           const payload = {
             username: 'adams1',
-            firstName: 'Brian',
-            lastName: 'Adams',
             email,
           }
           const result = UserInsertSchema.safeParse(payload)
@@ -117,8 +67,6 @@ describe('userSchema', () => {
     it('rejects password in insert', () => {
       const USER_1 = {
         username: 'adams',
-        firstName: 'brian',
-        lastName: 'adams',
         email: 'badam@mail.com',
         password: 'qwertz123',
       }
@@ -131,8 +79,6 @@ describe('userSchema', () => {
     it('rejects createdAt in insert', () => {
       const USER_1 = {
         username: 'adams',
-        firstName: 'brian',
-        lastName: 'adams',
         email: 'badam@mail.com',
         createdAt: new Date().toISOString(),
       }
@@ -145,8 +91,6 @@ describe('userSchema', () => {
     it('rejects updatedAt in insert', () => {
       const USER_1 = {
         username: 'adams',
-        firstName: 'brian',
-        lastName: 'adams',
         email: 'badam@mail.com',
         updatedAt: new Date().toISOString(),
       }
@@ -165,8 +109,6 @@ describe('userSchema', () => {
     it('rejects unknown fields', () => {
       const payload = {
         username: 'adams1',
-        firstName: 'brian',
-        lastName: 'adams',
         email: 'adams@mail.com',
         role: 'admin',
       }
@@ -197,8 +139,6 @@ describe('userSchema', () => {
     it('rejects password in select', () => {
       const USER_1 = {
         username: 'adams',
-        firstName: 'brian',
-        lastName: 'adams',
         email: 'badam@mail.com',
         password: 'qwertz123',
       }
