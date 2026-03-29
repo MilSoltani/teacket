@@ -5,10 +5,11 @@
     "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.app.tsbuildinfo",
     "baseUrl": ".",
     "paths": {
-      "@/*": ["./src/*"],
+      "@web/*": ["./src/*"],
       "@teacket/api/*": ["../api/src/*", "../api/*"],
       "@api/*": ["../api/src/*", "../api/*"]
     },
+    "types": ["vite/client"],
     "noUncheckedIndexedAccess": true
   },
   "include": ["src/**/*.ts", "src/**/*.tsx", "src/**/*.vue", "../api/client.ts", "../api/**/*.ts"]
