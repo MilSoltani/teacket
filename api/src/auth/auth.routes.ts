@@ -1,5 +1,5 @@
 import { createRoute } from '@hono/zod-openapi'
-import { LoginResponseSchema, LoginSchema } from './auth.schema'
+import { AuthSuccessResponse, LoginSchema } from './auth.schema'
 
 export const AuthRoutes = {
   login: createRoute({
@@ -17,7 +17,7 @@ export const AuthRoutes = {
       200: {
         content: {
           'application/json': {
-            schema: LoginResponseSchema,
+            schema: AuthSuccessResponse,
           },
         },
         description: 'Login successful, returns access and refresh tokens',
@@ -71,7 +71,11 @@ export const AuthRoutes = {
     tags: ['Auth'],
     responses: {
       200: {
-        content: {},
+        content: {
+          'application/json': {
+            schema: AuthSuccessResponse,
+          },
+        },
         description: 'Returns new access token',
       },
       401: {

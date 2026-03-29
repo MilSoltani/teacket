@@ -1,6 +1,6 @@
-import type { JWTPayload } from 'hono/utils/jwt/types'
-import type { TokenType } from './auth.schema'
+import type { TokenPayload, TokenType } from './auth.schema'
 import { env } from '@api/env'
+import { UnauthenticatedException } from '@api/lib/errors'
 import { sign, verify } from 'hono/jwt'
 
 export const TokenService = {
@@ -25,15 +25,15 @@ export const TokenService = {
     return await sign(payload, secret, 'HS256')
   },
 
-  async verify(token: string, type: 'access' | 'refresh'): Promise<JWTPayload | null> {
+  async verify(token: string, type: 'access' | 'refresh'): Promise<TokenPayload> {
     try {
       const secret = type === 'access'
         ? env.JWT_ACCESS_SECRET
         : env.JWT_REFRESH_SECRET
-      return await verify(token, secret, 'HS256') as JWTPayload
+      return await verify(token, secret, 'HS256') as TokenPayload
     }
     catch {
-      return null
+      throw new UnauthenticatedException('Invalid or expired token')
     }
   },
 }

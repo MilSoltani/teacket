@@ -1,5 +1,6 @@
+import type { Session } from '@api/sessions'
 import type { AuthUser } from './auth.schema'
-import { InvalidCredentialsException } from '@api/lib/errors'
+import { InvalidCredentialsException, UnauthenticatedException } from '@api/lib/errors'
 import { AuthRepository } from './auth.repository'
 import { CryptoService } from './crypto.service'
 
@@ -20,7 +21,13 @@ export const AuthService = {
     return user
   },
 
-  async refresh() {},
-  async signup() {},
-  async logout() {},
+  checkSessionValidity(session: Session) {
+    if (session.isRevoked) {
+      throw new UnauthenticatedException('Session is revoked')
+    }
+
+    if (session.expiresAt <= new Date()) {
+      throw new UnauthenticatedException('Session is expired')
+    }
+  },
 }

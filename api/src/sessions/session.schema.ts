@@ -26,8 +26,8 @@ export const SessionInsertSchema = createInsertSchema(sessionsTable).omit({
   createdAt: true,
   updatedAt: true,
 }).extend({
-  id: true,
-}).openapi('SessionInsert')
+  id: z.uuid(),
+}).strict().openapi('SessionInsert')
 
 export const SessionUpdateSchema = SessionInsertSchema
   .partial()

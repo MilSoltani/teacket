@@ -28,3 +28,23 @@ export const AuthHandler = new OpenAPIHono<AppEnvironment>()
 
     return c.json({ message: 'Login successful' }, 200)
   })
+  .openapi(AuthRoutes.refresh, async (c) => {
+    const refreshToken = CookieService.getRefreshToken(c)
+    const refreshTokenPayload = await TokenService.verify(refreshToken, 'refresh')
+
+    const sessionId = refreshTokenPayload.jti
+    const session = await SessionService.getById(sessionId)
+
+    AuthService.checkSessionValidity(session)
+
+    const userId = refreshTokenPayload.sub
+    const newAccessToken = await TokenService.generate(userId, 'access', sessionId)
+    const newRefreshToken = await TokenService.generate(userId, 'refresh', sessionId)
+
+    await SessionService.updateRefreshToken(sessionId, newRefreshToken)
+
+    CookieService.create(c, 'access', newAccessToken, 'access')
+    CookieService.create(c, 'refresh', refreshToken, 'refresh')
+
+    return c.json({ message: 'Tokens successfully refresed' }, 200)
+  })

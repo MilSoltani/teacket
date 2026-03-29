@@ -3,7 +3,7 @@ import { NotFoundException } from '@api/lib/errors'
 import { SessionRepository } from './session.repository'
 
 export const SessionService = {
-  async getById(id: number) {
+  async getById(id: string) {
     const result = await SessionRepository.getById(id)
 
     if (!result)
@@ -29,7 +29,7 @@ export const SessionService = {
     return result
   },
 
-  async updateRefreshToken(id: number, refreshTokenHash: string) {
+  async updateRefreshToken(id: string, refreshTokenHash: string) {
     const result = await SessionRepository.update(id, { refreshTokenHash })
 
     if (!result)
@@ -38,7 +38,7 @@ export const SessionService = {
     return result
   },
 
-  async revoke(id: number) {
+  async revoke(id: string) {
     const result = await SessionRepository.update(id, { isRevoked: true })
 
     if (!result)

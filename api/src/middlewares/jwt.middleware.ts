@@ -1,12 +1,11 @@
-import type { JWTPayload } from 'hono/utils/jwt/types'
-
+import type { TokenPayload } from '@api/auth'
 import { env } from '@api/env'
-import { createMiddleware } from 'hono/factory'
 
+import { createMiddleware } from 'hono/factory'
 import { jwt } from 'hono/jwt'
 
 export interface AppJwtVariables {
-  jwtPayload: JWTPayload
+  jwtPayload: TokenPayload
   userId: number
 }
 
@@ -21,7 +20,7 @@ export const jwtMiddleware = createMiddleware(async (c, next) => {
     alg: 'HS256',
     cookie: 'access',
   })(c, async () => {
-    const payload = c.get('jwtPayload') as JWTPayload
+    const payload = c.get('jwtPayload') as TokenPayload
 
     if (payload && payload.sub) {
       c.set('userId', payload.sub)

@@ -1,3 +1,4 @@
+import type { JWTPayload } from 'hono/utils/jwt/types'
 import { UserSelectSchema } from '@api/users'
 import z from 'zod'
 
@@ -18,8 +19,15 @@ export const AuthUserSchema = UserSelectSchema
   })
   .strict()
 
-export const LoginResponseSchema = z.object({
+export const AuthSuccessResponse = z.object({
   message: z.string(),
 })
 
 export type AuthUser = z.infer<typeof AuthUserSchema>
+
+export type TokenPayload = JWTPayload & {
+  sub: number
+  jti: string
+  iat: number
+  exp: number
+}

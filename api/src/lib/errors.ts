@@ -20,6 +20,12 @@ export class InvalidCredentialsException extends HTTPException {
   }
 }
 
+export class UnauthenticatedException extends HTTPException {
+  constructor(message: string = 'Invalid credentials') {
+    super(401, { message })
+  }
+}
+
 export function handleErrors(err: any, c: Context): Response {
   let status: number = 500
   let message: string = 'Internal server error'
