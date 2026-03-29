@@ -1,4 +1,4 @@
-import type { AuthUser } from '@api/auth'
+import type { AuthUser } from './auth.schema'
 import { db } from '@api/database'
 import { usersTable } from '@api/users'
 import { eq } from 'drizzle-orm'

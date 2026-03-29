@@ -1,6 +1,5 @@
-import type { TokenType } from '@api/auth'
-
 import type { Context } from 'hono'
+import type { TokenType } from './auth.schema'
 import { env } from '@api/env'
 import { setCookie } from 'hono/cookie'
 

@@ -1,9 +1,11 @@
 import type { AppEnvironment } from '@api/lib/types'
-import { AuthService, CookieService, TokenService } from '@api/auth'
 import { SessionService } from '@api/sessions'
 import { OpenAPIHono } from '@hono/zod-openapi'
 import { AuthRoutes } from './auth.routes'
+import { AuthService } from './auth.service'
+import { CookieService } from './cookie.service'
 import { CryptoService } from './crypto.service'
+import { TokenService } from './token.service'
 
 export const AuthHandler = new OpenAPIHono<AppEnvironment>()
   .openapi(AuthRoutes.login, async (c) => {

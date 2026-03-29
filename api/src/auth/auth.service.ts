@@ -1,4 +1,4 @@
-import type { AuthUser } from '@api/auth'
+import type { AuthUser } from './auth.schema'
 import { InvalidCredentialsException } from '@api/lib/errors'
 import { AuthRepository } from './auth.repository'
 import { CryptoService } from './crypto.service'

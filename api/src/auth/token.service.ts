@@ -1,5 +1,5 @@
-import type { TokenType } from '@api/auth'
 import type { JWTPayload } from 'hono/utils/jwt/types'
+import type { TokenType } from './auth.schema'
 import { env } from '@api/env'
 import { sign, verify } from 'hono/jwt'
 
