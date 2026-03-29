@@ -9,7 +9,7 @@
   "main": "index.js",
   "scripts": {
     "dev": "tsx watch --env-file=.env src/main.ts",
-    "debug": "tsx --inspect=9229 --env-file=.env src/index.ts"
+    "debug": "tsx --inspect=9229 --env-file=.env src/main.ts"
   },
   "dependencies": {
     "@electric-sql/pglite": "^0.4.2",

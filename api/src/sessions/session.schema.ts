@@ -1,12 +1,12 @@
 import { usersTable } from '@api/users'
 import { extendZodWithOpenApi, z } from '@hono/zod-openapi'
-import { boolean, integer, pgTable, text, timestamp, varchar } from 'drizzle-orm/pg-core'
+import { boolean, integer, pgTable, text, timestamp, uuid, varchar } from 'drizzle-orm/pg-core'
 import { createInsertSchema, createSelectSchema } from 'drizzle-zod'
 
 extendZodWithOpenApi(z)
 
 export const sessionsTable = pgTable('sessions', {
-  id: integer().primaryKey().generatedAlwaysAsIdentity(),
+  id: uuid().primaryKey(),
   userId: integer().notNull().references(() => usersTable.id, { onDelete: 'cascade' }),
   ipAddress: varchar({ length: 50 }),
   userAgent: varchar({ length: 255 }),
@@ -25,6 +25,8 @@ export const SessionSelectSchema = createSelectSchema(sessionsTable)
 export const SessionInsertSchema = createInsertSchema(sessionsTable).omit({
   createdAt: true,
   updatedAt: true,
+}).extend({
+  id: true,
 }).openapi('SessionInsert')
 
 export const SessionUpdateSchema = SessionInsertSchema

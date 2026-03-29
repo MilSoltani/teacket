@@ -1,4 +1,5 @@
 import type { Session, SessionInsertPayload, SessionUpdatePayload } from './session.schema'
+import { CryptoService } from '@api/auth/crypto.service'
 import { db } from '@api/database'
 import { eq } from 'drizzle-orm'
 import { sessionsTable } from './session.schema'
@@ -12,7 +13,7 @@ export const SessionRepository = {
     return result
   },
 
-  async getById(id: number): Promise<Session | undefined> {
+  async getById(id: string): Promise<Session | undefined> {
     const [result] = await db
       .select()
       .from(sessionsTable)
@@ -24,23 +25,23 @@ export const SessionRepository = {
   async create(data: SessionInsertPayload): Promise<Session | undefined> {
     const [result] = await db
       .insert(sessionsTable)
-      .values(data)
+      .values({ ...data, id: CryptoService.genUuid() })
       .returning()
 
     return result
   },
 
-  async update(id: number, data: SessionUpdatePayload): Promise<Session | undefined> {
+  async update(id: string, data: SessionUpdatePayload): Promise<Session | undefined> {
     const [result] = await db
       .update(sessionsTable)
-      .set({ ...data, updatedAt: new Date() })
+      .set({ ...data, id: CryptoService.genUuid(), updatedAt: new Date() })
       .where(eq(sessionsTable.id, id))
       .returning()
 
     return result
   },
 
-  async delete(id: number): Promise<Session | undefined> {
+  async delete(id: string): Promise<Session | undefined> {
     const [result] = await db
       .delete(sessionsTable)
       .where(eq(sessionsTable.id, id))

@@ -6,7 +6,7 @@ import { drizzle } from 'drizzle-orm/pglite'
 import { migrate } from 'drizzle-orm/pglite/migrator'
 import { afterAll, beforeAll, beforeEach, vi } from 'vitest'
 
-vi.mock('@api/../env', () => ({
+vi.mock('@api/env', () => ({
   env: {
     DATABASE_URL: 'memory://test',
     NODE_ENV: 'local',

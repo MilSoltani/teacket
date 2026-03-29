@@ -12,15 +12,18 @@ export const SessionService = {
     return result
   },
 
-  async create(userId: number, refreshTokenHash: string) {
+  async create(id: string, userId: number, refreshTokenHash: string, userAgent: string | undefined, ipAddress: string | undefined) {
     const expiresAtMilliSeconds
       = Date.now() + env.REFRESH_TOKEN_EXPIRY * 1000
     const expiresAt = new Date(expiresAtMilliSeconds)
 
     const result = await SessionRepository.create({
+      id,
       userId,
       refreshTokenHash,
       expiresAt,
+      userAgent,
+      ipAddress,
     })
 
     return result

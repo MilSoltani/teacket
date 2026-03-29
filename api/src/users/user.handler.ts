@@ -4,7 +4,7 @@ import { UserRoutes } from './user.routes'
 import { UserSelectSchema } from './user.schema'
 import { UserService } from './user.service'
 
-export const userHandler = new OpenAPIHono<AppEnvironment>()
+export const UserHandler = new OpenAPIHono<AppEnvironment>()
   .openapi(UserRoutes.getAll, async (c) => {
     const data = await UserService.getAll()
     const parsedData = z.array(UserSelectSchema).parse(data)

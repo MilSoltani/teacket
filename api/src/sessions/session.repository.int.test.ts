@@ -1,11 +1,12 @@
 import type { UserInsertPayload } from '@api/users'
 import type { SessionInsertPayload } from './session.schema'
+import { CryptoService } from '@api/auth/crypto.service'
 import { UserRepository } from '@api/users'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { SessionRepository } from './session.repository'
 
 describe('sessionsRepository', () => {
-  const NON_EXISTENT_SESSION_ID = 999
+  const NON_EXISTENT_SESSION_ID = crypto.randomUUID()
 
   const USER_1: UserInsertPayload = {
     username: 'badams',
@@ -20,6 +21,7 @@ describe('sessionsRepository', () => {
     const userId = createdUser!.id
 
     session_1 = {
+      id: CryptoService.genUuid(),
       userId,
       ipAddress: '192.168.1.10',
       userAgent: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)',
@@ -28,6 +30,7 @@ describe('sessionsRepository', () => {
     }
 
     session_2 = {
+      id: CryptoService.genUuid(),
       userId,
       ipAddress: '10.0.0.5',
       userAgent: 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X)',
