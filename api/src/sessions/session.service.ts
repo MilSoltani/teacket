@@ -1,4 +1,4 @@
-import { env } from '@api/../env'
+import { env } from '@api/env'
 import { NotFoundException } from '@api/lib/errors'
 import { SessionRepository } from './session.repository'
 

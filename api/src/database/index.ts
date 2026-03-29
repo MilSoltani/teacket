@@ -1,5 +1,5 @@
-import { env } from '@api/../env'
 import * as schema from '@api/database/schema'
+import { env } from '@api/env'
 import { drizzle } from 'drizzle-orm/node-postgres'
 import { Pool } from 'pg'
 
