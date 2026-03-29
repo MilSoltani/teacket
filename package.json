@@ -8,7 +8,7 @@
   "keywords": [],
   "main": "index.js",
   "scripts": {
-    "dev": "pnpm -r dev",
+    "dev": "concurrently \"pnpm --filter ./api dev\" \"pnpm --filter ./web dev\"",
     "lint": "eslint",
     "lint:fix": "eslint --fix",
     "prepare": "husky",
@@ -21,6 +21,7 @@
     "@antfu/eslint-config": "^7.7.3",
     "@commitlint/cli": "^20.5.0",
     "@commitlint/config-conventional": "^20.5.0",
+    "concurrently": "^9.2.1",
     "eslint": "^10.0.3",
     "husky": "^9.1.7",
     "nano-staged": "^0.9.0",
