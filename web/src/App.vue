@@ -1,10 +1,10 @@
 <script setup lang="ts">
-import Button from '@web/components/ui/button/Button.vue'
 import {UserClient} from '@teacket/api/clients'
+import { RouterView } from 'vue-router';
 
 UserClient.index.$get()
 </script>
 
 <template>
-  <Button>Hello!</Button>
+  <RouterView />
 </template>
