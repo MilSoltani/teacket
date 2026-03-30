@@ -6,6 +6,8 @@ extendZodWithOpenApi(z)
 
 export const usersTable = pgTable('users', {
   id: integer().primaryKey().generatedAlwaysAsIdentity(),
+  firstName: varchar({ length: 255 }),
+  lastName: varchar({ length: 255 }),
   username: varchar({ length: 255 }).notNull().unique(),
   password: varchar({ length: 255 }),
   email: varchar({ length: 255 }).notNull().unique(),
@@ -23,6 +25,8 @@ export const UserSelectSchema = createSelectSchema(usersTable)
 export const UserInsertSchema = createInsertSchema(usersTable, {
   username: z.string().min(5).max(255),
   email: z.email().min(5).max(255),
+  firstName: z.string().min(1).max(255).nullable(),
+  lastName: z.string().min(1).max(255).nullable(),
 }).omit({
   password: true,
   createdAt: true,
@@ -35,6 +39,8 @@ export const UserUpdateSchema = UserInsertSchema
 
 export const publicColumns = {
   id: usersTable.id,
+  firstName: usersTable.firstName,
+  lastName: usersTable.lastName,
   username: usersTable.username,
   email: usersTable.email,
   createdAt: usersTable.createdAt,

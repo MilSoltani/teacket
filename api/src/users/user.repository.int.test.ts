@@ -6,12 +6,16 @@ describe('usersRepository', () => {
   const NON_EXISTENT_USER_ID = 999
 
   const USER_1: UserInsertPayload = {
+    firstName: 'brian',
+    lastName: 'adams',
     username: 'badams',
     email: 'badams@mail.com',
   }
 
   const USER_2: UserInsertPayload = {
     username: 'jsmith',
+    firstName: 'john',
+    lastName: 'smith',
     email: 'jsmith@mail.com',
   }
 
@@ -82,6 +86,8 @@ describe('usersRepository', () => {
 
       expect(result).toBeDefined()
       expect(result!.username).toBe(u1!.username)
+      expect(result!.firstName).toBe(u1!.firstName)
+      expect(result!.lastName).toBe(u1!.lastName)
       expect(result!.email).toBe(u1!.email)
     })
 
@@ -98,6 +104,8 @@ describe('usersRepository', () => {
 
     it('fails on invalid input', async () => {
       const USER = {
+        firstName: 'brian',
+        lastName: 'adams',
         email: 'badams@mail.com',
       }
 

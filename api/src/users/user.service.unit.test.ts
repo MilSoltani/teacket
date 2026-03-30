@@ -19,6 +19,8 @@ describe('userService', () => {
 
   const USER_1: User = {
     id: 1,
+    firstName: 'brian',
+    lastName: 'adams',
     username: 'badams',
     email: 'badams@mail.com',
     createdAt: new Date(),
@@ -27,6 +29,8 @@ describe('userService', () => {
 
   const USER_2: User = {
     id: 2,
+    firstName: 'john',
+    lastName: 'smith',
     username: 'jsmith',
     email: 'jsmith@mail.com',
     createdAt: new Date(),

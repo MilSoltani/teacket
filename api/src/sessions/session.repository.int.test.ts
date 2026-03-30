@@ -9,6 +9,8 @@ describe('sessionsRepository', () => {
   const NON_EXISTENT_SESSION_ID = 999
 
   const USER_1: UserInsertPayload = {
+    firstName: 'brian',
+    lastName: 'adams',
     username: 'badams',
     email: 'badams@mail.com',
   }
