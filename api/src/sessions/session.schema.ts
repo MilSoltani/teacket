@@ -6,11 +6,13 @@ import { createInsertSchema, createSelectSchema } from 'drizzle-zod'
 extendZodWithOpenApi(z)
 
 export const sessionsTable = pgTable('sessions', {
-  id: uuid().primaryKey(),
+  id: integer().primaryKey().generatedAlwaysAsIdentity(),
   userId: integer().notNull().references(() => usersTable.id, { onDelete: 'cascade' }),
   ipAddress: varchar({ length: 50 }),
   userAgent: varchar({ length: 255 }),
   refreshTokenHash: text().unique().notNull(),
+  familyId: uuid().notNull(),
+  isUsed: boolean().default(false),
   isRevoked: boolean().default(false),
   expiresAt: timestamp({ withTimezone: true }).notNull(),
   createdAt: timestamp('created_at').defaultNow().notNull(),
@@ -25,8 +27,6 @@ export const SessionSelectSchema = createSelectSchema(sessionsTable)
 export const SessionInsertSchema = createInsertSchema(sessionsTable).omit({
   createdAt: true,
   updatedAt: true,
-}).extend({
-  id: z.uuid(),
 }).strict().openapi('SessionInsert')
 
 export const SessionUpdateSchema = SessionInsertSchema

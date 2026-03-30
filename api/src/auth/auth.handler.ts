@@ -1,28 +1,38 @@
 import type { AppEnvironment } from '@api/lib/types'
+import { CookieService, CryptoService, JwtService } from '@api/lib/auth'
 import { SessionService } from '@api/sessions'
 import { OpenAPIHono } from '@hono/zod-openapi'
 import { AuthRoutes } from './auth.routes'
 import { AuthService } from './auth.service'
-import { CookieService } from './cookie.service'
-import { CryptoService } from './crypto.service'
-import { TokenService } from './token.service'
 
 export const AuthHandler = new OpenAPIHono<AppEnvironment>()
   .openapi(AuthRoutes.login, async (c) => {
     const { username, password } = c.req.valid('json')
 
+    // Authenticate the user
+    const authUser = await AuthService.authenticateUser(username, password)
+
+    // Generate raw tokens (the strings that go to the user)
+    const accessToken = await JwtService.generate(authUser.id, 'access')
+    const refreshToken = await JwtService.generate(authUser.id, 'refresh')
+
+    // HASH the refresh token before it touches the database
+    const refreshTokenHash = CryptoService.sha256(refreshToken)
+
+    // Create the session using the HASH
+    const familyId = CryptoService.genUuid()
     const userAgent = c.req.header('User-Agent')
     const ipAddress = c.req.header('x-forwarded-for')?.split(',')[0]
 
-    const authUser = await AuthService.getAuthUser(username, password)
+    await SessionService.create(
+      authUser.id,
+      refreshTokenHash,
+      userAgent,
+      ipAddress,
+      familyId,
+    )
 
-    const sessionId = CryptoService.genUuid()
-
-    const accessToken = await TokenService.generate(authUser.id, 'access', sessionId)
-    const refreshToken = await TokenService.generate(authUser.id, 'refresh', sessionId)
-
-    await SessionService.create(sessionId, authUser.id, refreshToken, userAgent, ipAddress)
-
+    // Send the RAW tokens to the user via cookies
     CookieService.create(c, 'access', accessToken, 'access')
     CookieService.create(c, 'refresh', refreshToken, 'refresh')
 
@@ -30,21 +40,28 @@ export const AuthHandler = new OpenAPIHono<AppEnvironment>()
   })
   .openapi(AuthRoutes.refresh, async (c) => {
     const refreshToken = CookieService.getRefreshToken(c)
-    const refreshTokenPayload = await TokenService.verify(refreshToken, 'refresh')
 
-    const sessionId = refreshTokenPayload.jti
-    const session = await SessionService.getById(sessionId)
+    // Hash the incoming token to look it up
+    const hashedToken = CryptoService.sha256(refreshToken)
+    const session = await SessionService.getSessionByHash(hashedToken)
 
-    AuthService.checkSessionValidity(session)
+    // Validate (This throws if expired, used or revoked -> revokes family)
+    await SessionService.checkSessionValidity(session)
 
-    const userId = refreshTokenPayload.sub
-    const newAccessToken = await TokenService.generate(userId, 'access', sessionId)
-    const newRefreshToken = await TokenService.generate(userId, 'refresh', sessionId)
+    // JWT Verify
+    const payload = await JwtService.verify(refreshToken, 'refresh')
+    const userId = payload.sub as number
 
-    await SessionService.updateRefreshToken(sessionId, newRefreshToken)
+    // Generate New Tokens
+    const newAccessToken = await JwtService.generate(userId, 'access')
+    const newRefreshToken = await JwtService.generate(userId, 'refresh')
+    const newHashedToken = CryptoService.sha256(newRefreshToken)
+
+    // Set session isUsed=true and create new one for same family
+    await SessionService.rotateSession(session, newHashedToken)
 
     CookieService.create(c, 'access', newAccessToken, 'access')
-    CookieService.create(c, 'refresh', refreshToken, 'refresh')
+    CookieService.create(c, 'refresh', newRefreshToken, 'refresh')
 
-    return c.json({ message: 'Tokens successfully refresed' }, 200)
+    return c.json({ message: 'Tokens successfully refreshed' }, 200)
   })

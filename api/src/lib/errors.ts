@@ -26,6 +26,12 @@ export class UnauthenticatedException extends HTTPException {
   }
 }
 
+export class ForbiddenException extends HTTPException {
+  constructor(message: string = 'Forbidden request') {
+    super(403, { message })
+  }
+}
+
 export function handleErrors(err: any, c: Context): Response {
   let status: number = 500
   let message: string = 'Internal server error'

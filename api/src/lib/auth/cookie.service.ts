@@ -1,5 +1,5 @@
+import type { TokenType } from '@api/auth'
 import type { Context } from 'hono'
-import type { TokenType } from './auth.schema'
 import { env } from '@api/env'
 import { UnauthenticatedException } from '@api/lib/errors'
 import { getCookie, setCookie } from 'hono/cookie'
@@ -13,7 +13,7 @@ export const CookieService = {
   ) {
     const secure = env.NODE_ENV === 'production'
     const sameSite = secure ? 'Strict' : 'Lax'
-    const path = tokenType === 'access' ? '/auth' : '/api/auth/refresh'
+    const path = tokenType === 'access' ? '/api' : '/api/auth/refresh'
     const maxAge = tokenType === 'access' ? env.ACCESS_TOKEN_EXPIRY : env.REFRESH_TOKEN_EXPIRY
 
     setCookie(c, name, value, {
