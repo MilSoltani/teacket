@@ -3,23 +3,30 @@ import z from 'zod'
 
 export type TokenType = 'access' | 'refresh'
 
-export const LoginSchema = z.object({
-  username: z.string().min(5).max(32),
+export const LoginSchema = UserSelectSchema.pick({
+  username: true,
+}).extend({
   password: z.string().min(12).max(128),
-})
+}).strict()
 
-export const AuthUserSchema = UserSelectSchema
-  .pick({
-    id: true,
-    username: true,
-  })
-  .extend({
-    password: z.string().min(8).max(255).nullable(),
-  })
-  .strict()
+export const SignupSchema = UserSelectSchema.pick({
+  firstName: true,
+  lastName: true,
+  email: true,
+  username: true,
+}).extend({
+  password: z.string().min(12).max(128),
+}).strict()
 
 export const AuthSuccessResponse = z.object({
   message: z.string(),
 })
 
-export type AuthUser = z.infer<typeof AuthUserSchema>
+export type LoginPayload = z.infer<typeof LoginSchema>
+export type SignupPayload = z.infer<typeof SignupSchema>
+
+export interface AuthUser {
+  id: number
+  username: string
+  password: string
+}

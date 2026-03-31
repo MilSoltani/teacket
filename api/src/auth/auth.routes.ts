@@ -1,5 +1,6 @@
+import { UserSelectSchema } from '@api/users'
 import { createRoute } from '@hono/zod-openapi'
-import { AuthSuccessResponse, LoginSchema } from './auth.schema'
+import { AuthSuccessResponse, LoginSchema, SignupSchema } from './auth.schema'
 
 export const AuthRoutes = {
   login: createRoute({
@@ -29,29 +30,22 @@ export const AuthRoutes = {
     },
   }),
 
-  logout: createRoute({
-    method: 'post',
-    path: '/logout',
-    tags: ['Auth'],
-    responses: {
-      204: {
-        content: {},
-        description: 'Logout successful, refresh token revoked (no content)',
-      },
-      401: {
-        content: {},
-        description: 'Invalid or missing refresh token',
-      },
-    },
-  }),
-
   signup: createRoute({
     method: 'post',
     path: '/signup',
     tags: ['Auth'],
+    request: {
+      body: {
+        content: {
+          'application/json': { schema: SignupSchema },
+        },
+      },
+    },
     responses: {
       201: {
-        content: {},
+        content: {
+          'application/json': { schema: UserSelectSchema },
+        },
         description: 'Signup successful, returns access and refresh tokens',
       },
       400: {

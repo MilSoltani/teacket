@@ -1,6 +1,7 @@
-import type { AuthUser } from './auth.schema'
+import type { User } from '@api/users'
+import type { AuthUser, SignupPayload } from './auth.schema'
 import { db } from '@api/database'
-import { usersTable } from '@api/users'
+import { publicColumns, usersTable } from '@api/users'
 import { eq } from 'drizzle-orm'
 
 export const AuthRepository = {
@@ -14,6 +15,15 @@ export const AuthRepository = {
       .from(usersTable)
       .where(eq(usersTable.username, username))
 
-    return result[0]
+    return result[0] as AuthUser
+  },
+
+  async create(data: SignupPayload): Promise<User> {
+    const [result] = await db
+      .insert(usersTable)
+      .values(data)
+      .returning(publicColumns)
+
+    return result
   },
 }
