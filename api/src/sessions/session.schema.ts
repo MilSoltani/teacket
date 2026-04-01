@@ -1,4 +1,4 @@
-import { usersTable } from '@api/users'
+import { usersTable } from '@api/users/user.schema'
 import { extendZodWithOpenApi, z } from '@hono/zod-openapi'
 import { boolean, integer, pgTable, text, timestamp, uuid, varchar } from 'drizzle-orm/pg-core'
 import { createInsertSchema, createSelectSchema } from 'drizzle-zod'
@@ -15,8 +15,8 @@ export const sessionsTable = pgTable('sessions', {
   isUsed: boolean().default(false),
   isRevoked: boolean().default(false),
   expiresAt: timestamp({ withTimezone: true }).notNull(),
-  createdAt: timestamp('created_at').defaultNow().notNull(),
-  updatedAt: timestamp('updated_at').defaultNow().notNull(),
+  createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
 })
 
 /* zod schemas ------- */

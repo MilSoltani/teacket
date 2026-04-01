@@ -1,5 +1,6 @@
 import type { AppEnvironment } from '@api/lib/types'
 import type { SignupPayload } from './auth.schema'
+import { env } from '@api/env'
 import { CookieService, CryptoService, JwtService } from '@api/lib/auth'
 import { SessionService } from '@api/sessions'
 import { UserSelectSchema } from '@api/users'
@@ -27,13 +28,18 @@ export const AuthHandler = new OpenAPIHono<AppEnvironment>()
     const userAgent = c.req.header('User-Agent')
     const ipAddress = c.req.header('x-forwarded-for')?.split(',')[0]
 
-    await SessionService.create(
-      authUser.id,
+    const expiresAtMilliSeconds
+      = Date.now() + env.REFRESH_TOKEN_EXPIRY * 1000
+    const expiresAt = new Date(expiresAtMilliSeconds)
+
+    await SessionService.create({
+      userId: authUser.id,
       refreshTokenHash,
       userAgent,
       ipAddress,
       familyId,
-    )
+      expiresAt,
+    })
 
     // Send the RAW tokens to the user via cookies
     CookieService.create(c, 'access', accessToken, 'access')
@@ -90,13 +96,18 @@ export const AuthHandler = new OpenAPIHono<AppEnvironment>()
     const userAgent = c.req.header('User-Agent')
     const ipAddress = c.req.header('x-forwarded-for')?.split(',')[0]
 
-    await SessionService.create(
-      user.id,
+    const expiresAtMilliSeconds
+      = Date.now() + env.REFRESH_TOKEN_EXPIRY * 1000
+    const expiresAt = new Date(expiresAtMilliSeconds)
+
+    await SessionService.create({
+      userId: user.id,
       refreshTokenHash,
       userAgent,
       ipAddress,
       familyId,
-    )
+      expiresAt,
+    })
 
     // Send the RAW tokens to the user via cookies
     CookieService.create(c, 'access', accessToken, 'access')

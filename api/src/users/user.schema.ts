@@ -11,8 +11,8 @@ export const usersTable = pgTable('users', {
   username: varchar({ length: 255 }).notNull().unique(),
   password: varchar({ length: 255 }),
   email: varchar({ length: 255 }).notNull().unique(),
-  createdAt: timestamp('created_at').defaultNow().notNull(),
-  updatedAt: timestamp('updated_at').defaultNow().notNull(),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
+  createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
 })
 
 /* zod schemas ------- */

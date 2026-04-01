@@ -2,6 +2,7 @@ import type { Session, SessionInsertPayload } from './session.schema'
 import { env } from '@api/env'
 import { ForbiddenException, NotFoundException, UnauthenticatedException } from '@api/lib/errors'
 import { SessionRepository } from './session.repository'
+import { SessionInsertSchema } from './session.schema'
 
 export const SessionService = {
   async getSessionByHash(refreshTokenHash: string) {
@@ -13,15 +14,12 @@ export const SessionService = {
     return result
   },
 
-  async checkSessionValidity(session: Session | undefined) {
-    if (!session)
-      throw new NotFoundException('Session')
-
+  async checkSessionValidity(session: Session) {
     if (session.isRevoked) {
       throw new UnauthenticatedException('Session revoked')
     }
 
-    if (new Date() > session.expiresAt) {
+    if (new Date() <= session.expiresAt) {
       throw new UnauthenticatedException('Session expired')
     }
 
@@ -31,19 +29,10 @@ export const SessionService = {
     }
   },
 
-  async create(userId: number, refreshTokenHash: string, userAgent: string | undefined, ipAddress: string | undefined, familyId: string) {
-    const expiresAtMilliSeconds
-      = Date.now() + env.REFRESH_TOKEN_EXPIRY * 1000
-    const expiresAt = new Date(expiresAtMilliSeconds)
+  async create(data: SessionInsertPayload) {
+    const parsedData = SessionInsertSchema.parse(data)
 
-    const result = await SessionRepository.create({
-      userId,
-      refreshTokenHash,
-      expiresAt,
-      userAgent,
-      ipAddress,
-      familyId,
-    })
+    const result = await SessionRepository.create(parsedData)
 
     return result
   },
