@@ -118,8 +118,6 @@ describe('sessionService', () => {
     })
   })
 
-  describe('rotateSession', () => {})
-
   describe('setRevoked', async () => {
     it('sets session revoked=true when found', async () => {
       vi.mocked(SessionRepository.update).mockResolvedValue(SESSION_1)

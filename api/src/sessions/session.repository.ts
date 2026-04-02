@@ -57,7 +57,7 @@ export const SessionRepository = {
     return result
   },
 
-  async create(data: SessionInsertPayload): Promise<Session | undefined> {
+  async create(data: SessionInsertPayload): Promise<Session> {
     const [result] = await db
       .insert(sessionsTable)
       .values({ ...data })

@@ -4,6 +4,7 @@ import { CryptoService } from '@api/lib/auth/crypto.service'
 import { UserRepository } from '@api/users'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { SessionRepository } from './session.repository'
+import { SessionService } from './session.service'
 
 describe('sessionsRepository', () => {
   const NON_EXISTENT_SESSION_ID = 999
@@ -28,7 +29,7 @@ describe('sessionsRepository', () => {
       ipAddress: '192.168.1.10',
       userAgent: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)',
       refreshTokenHash: 'XYZSECRETSVERYIMPORTANT1',
-      expiresAt: new Date(),
+      expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
     }
 
     session_2 = {
@@ -37,7 +38,7 @@ describe('sessionsRepository', () => {
       ipAddress: '10.0.0.5',
       userAgent: 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X)',
       refreshTokenHash: 'XYZSECRETSVERYIMPORTANT2',
-      expiresAt: new Date(),
+      expiresAt: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000),
     }
 
     vi.clearAllMocks()
@@ -76,6 +77,49 @@ describe('sessionsRepository', () => {
 
       expect(result).toBeDefined()
       expect(result!.id).toBe(s1!.id)
+    })
+  })
+
+  describe('getSessionByHash', () => {
+    it('returns undefined if session does not exist', async () => {
+      const result = await SessionRepository.getSessionByHash('a-hash-not-to-be-found')
+
+      expect(result).toBeUndefined()
+    })
+
+    it('returns correct session for valid refreshTokenHash', async () => {
+      const s1 = await SessionRepository.create(session_1)
+
+      const result = await SessionRepository.getSessionByHash(s1!.refreshTokenHash)
+
+      expect(result).toBeDefined()
+      expect(result!.refreshTokenHash).toBe(s1!.refreshTokenHash)
+    })
+  })
+
+  describe('rotateSession', () => {
+    it('marks the old session as used and create a new session', async () => {
+      const s1 = await SessionRepository.create(session_1)
+
+      const newRefreshToken = 'lsdjldsjlfjsdlfjslkjfd'
+      await SessionService.rotateSession(s1, newRefreshToken)
+
+      const sessions = await SessionRepository.getAll()
+
+      expect(sessions.length).toEqual(2)
+      expect(sessions.find(s => s.refreshTokenHash === s1.refreshTokenHash))
+      expect(sessions.find(s => s.refreshTokenHash === newRefreshToken))
+    })
+
+    it('maintains the same familyId across the rotation for token refresh chains', async () => {
+      const s1 = await SessionRepository.create(session_1)
+
+      const newRefreshToken = 'lsdjldsjlfjsdlfjslkjfd'
+      await SessionService.rotateSession(s1, newRefreshToken)
+
+      const sessions = await SessionRepository.getAll()
+
+      expect(sessions.every(s => s.familyId === session_1.familyId))
     })
   })
 

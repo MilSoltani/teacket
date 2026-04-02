@@ -10,6 +10,10 @@ vi.mock('@api/env', () => ({
   env: {
     DATABASE_URL: 'memory://test',
     NODE_ENV: 'local',
+    JWT_ACCESS_SECRET: 'test-access-secret',
+    JWT_REFRESH_SECRET: 'test-refresh-secret',
+    ACCESS_TOKEN_EXPIRY: 60, // seconds
+    REFRESH_TOKEN_EXPIRY: 60 * 60 * 24 * 7, // 7 days in seconds
   },
 }))
 
