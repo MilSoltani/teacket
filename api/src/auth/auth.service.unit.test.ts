@@ -1,4 +1,4 @@
-import type { Session } from '@api/sessions'
+import type { Session } from '@api/sessions/session.schema'
 import { ForbiddenException, UnauthenticatedException } from '@api/lib/errors'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { createAuthService } from './auth.service'

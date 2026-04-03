@@ -1,4 +1,4 @@
-import { UserSelectSchema } from '@api/users'
+import { UserSelectSchema } from '@api/users/user.schema'
 import { createRoute } from '@hono/zod-openapi'
 import { AuthSuccessResponse, LoginSchema, SignupSchema } from './auth.schema'
 

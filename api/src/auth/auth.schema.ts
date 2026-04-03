@@ -1,4 +1,4 @@
-import { UserSelectSchema } from '@api/users'
+import { UserSelectSchema } from '@api/users/user.schema'
 import z from 'zod'
 
 export type TokenType = 'access' | 'refresh'

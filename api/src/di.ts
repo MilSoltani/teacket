@@ -1,10 +1,13 @@
 import type { DbClient } from '@api/database'
-import { createAuthRepository, createAuthService } from '@api/auth'
-import { createSessionRepository, createSessionService } from '@api/sessions'
-import { createUserRepository, createUserService } from '@api/users'
 import { CookieUtil } from '@api/utils/cookie.util'
 import { CryptoUtil } from '@api/utils/crypto.util'
 import { JwtUtil } from '@api/utils/jwt.util'
+import { createAuthRepository } from './auth/auth.repository'
+import { createAuthService } from './auth/auth.service'
+import { createSessionRepository } from './sessions/session.repository'
+import { createSessionService } from './sessions/session.service'
+import { createUserRepository } from './users/user.repository'
+import { createUserService } from './users/user.service'
 
 type Repositories = ReturnType<typeof createRepositories>
 type Utilities = ReturnType<typeof createUtilities>

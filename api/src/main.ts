@@ -1,15 +1,15 @@
-import { createAuthHandler } from '@api/auth'
 import { db } from '@api/database'
 import { env } from '@api/env'
 import { handleErrors } from '@api/lib/errors'
-import { createUserHandler } from '@api/users'
 import { serve } from '@hono/node-server'
 import { swaggerUI } from '@hono/swagger-ui'
 import { OpenAPIHono } from '@hono/zod-openapi'
 import { cors } from 'hono/cors'
 import { jwt } from 'hono/jwt'
 import { logger } from 'hono/logger'
+import { createAuthHandler } from './auth/auth.handler'
 import { createContainer } from './di'
+import { createUserHandler } from './users/user.handler'
 
 const app = new OpenAPIHono()
 

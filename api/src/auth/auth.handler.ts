@@ -1,6 +1,6 @@
 import type { createAuthService } from '@api/auth/auth.service'
 import type { CookieUtil } from '@api/utils/cookie.util'
-import { UserSelectSchema } from '@api/users'
+import { UserSelectSchema } from '@api/users/user.schema'
 import { OpenAPIHono } from '@hono/zod-openapi'
 import { AuthRoutes } from './auth.routes'
 

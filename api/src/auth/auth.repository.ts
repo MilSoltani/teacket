@@ -1,7 +1,7 @@
 import type { DbClient, DbContext } from '@api/database'
-import type { User } from '@api/users'
+import type { User } from '@api/users/user.schema'
 import type { AuthUser, SignupPayload } from './auth.schema'
-import { publicColumns, usersTable } from '@api/users'
+import { publicColumns, usersTable } from '@api/users/user.schema'
 import { eq } from 'drizzle-orm'
 
 export interface IAuthRepository {
