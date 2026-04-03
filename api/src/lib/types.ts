@@ -1,3 +1,7 @@
+import type { createContainer } from '@api/di'
+
 export interface AppEnvironment {
-  Variables: object
+  Variables: {
+    container: ReturnType<typeof createContainer>
+  }
 }

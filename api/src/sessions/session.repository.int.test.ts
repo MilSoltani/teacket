@@ -1,7 +1,7 @@
 import type { UserInsertPayload } from '@api/users'
 import type { SessionInsertPayload } from './session.schema'
-import { CryptoService } from '@api/lib/auth/crypto.service'
 import { UserRepository } from '@api/users'
+import { CryptoUtil } from '@api/utils/crypto.util'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { SessionRepository } from './session.repository'
 import { SessionService } from './session.service'
@@ -24,7 +24,7 @@ describe('sessionsRepository', () => {
     const userId = createdUser!.id
 
     session_1 = {
-      familyId: CryptoService.genUuid(),
+      familyId: CryptoUtil.genUuid(),
       userId,
       ipAddress: '192.168.1.10',
       userAgent: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)',
@@ -33,7 +33,7 @@ describe('sessionsRepository', () => {
     }
 
     session_2 = {
-      familyId: CryptoService.genUuid(),
+      familyId: CryptoUtil.genUuid(),
       userId,
       ipAddress: '10.0.0.5',
       userAgent: 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X)',

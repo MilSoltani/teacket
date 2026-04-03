@@ -9,8 +9,12 @@ import { OpenAPIHono } from '@hono/zod-openapi'
 import { cors } from 'hono/cors'
 import { jwt } from 'hono/jwt'
 import { logger } from 'hono/logger'
+import { containerMiddleware, createContainer } from './di'
 
 const app = new OpenAPIHono<AppEnvironment>()
+
+const contianer = createContainer()
+app.use(containerMiddleware(contianer))
 
 app.use(logger())
 app.use('/*', cors())

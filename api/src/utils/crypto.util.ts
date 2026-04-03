@@ -3,7 +3,7 @@ import { createHash, randomUUID } from 'node:crypto'
 
 import { compare, hash } from 'bcryptjs'
 
-export const CryptoService = {
+export const CryptoUtil = {
   async hash(token: string): Promise<string> {
     return await hash(token, 12)
   },

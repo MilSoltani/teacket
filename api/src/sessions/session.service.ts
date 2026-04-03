@@ -1,74 +1,61 @@
+import type { SessionRepository } from './session.repository'
 import type { Session, SessionInsertPayload } from './session.schema'
 import { env } from '@api/env'
-import { ForbiddenException, NotFoundException, UnauthenticatedException } from '@api/lib/errors'
-import { SessionRepository } from './session.repository'
+import { NotFoundException } from '@api/lib/errors'
 import { SessionInsertSchema } from './session.schema'
 
-export const SessionService = {
-  async getSessionByHash(refreshTokenHash: string) {
-    const result = await SessionRepository.getSessionByHash(refreshTokenHash)
+export function SessionService(sessionRepository: typeof SessionRepository) {
+  return {
+    async getSessionByHash(refreshTokenHash: string) {
+      const result = await sessionRepository.getSessionByHash(refreshTokenHash)
 
-    if (!result)
-      throw new NotFoundException('Session')
+      if (!result)
+        throw new NotFoundException('Session')
 
-    return result
-  },
+      return result
+    },
 
-  async checkSessionValidity(session: Session) {
-    if (session.isRevoked) {
-      throw new UnauthenticatedException('Session revoked')
-    }
+    async create(data: SessionInsertPayload) {
+      const parsedData = SessionInsertSchema.parse(data)
 
-    if (new Date() <= session.expiresAt) {
-      throw new UnauthenticatedException('Session expired')
-    }
+      const result = await sessionRepository.create(parsedData)
 
-    if (session.isUsed) {
-      await SessionRepository.revokeEntireFamily(session.familyId)
-      throw new ForbiddenException('Security breach detected. All sessions revoked.')
-    }
-  },
+      return result
+    },
 
-  async create(data: SessionInsertPayload) {
-    const parsedData = SessionInsertSchema.parse(data)
+    async rotateSession(oldSession: Session, refreshTokenHash: string) {
+      const expiresAtMilliSeconds
+        = Date.now() + env.REFRESH_TOKEN_EXPIRY * 1000
+      const expiresAt = new Date(expiresAtMilliSeconds)
 
-    const result = await SessionRepository.create(parsedData)
+      const newSession: SessionInsertPayload = {
+        userId: oldSession.userId,
+        ipAddress: oldSession.ipAddress,
+        userAgent: oldSession.userAgent,
+        refreshTokenHash,
+        familyId: oldSession.familyId,
+        expiresAt,
+      }
 
-    return result
-  },
+      const result = await sessionRepository.rotateSession(oldSession.id, newSession)
 
-  async rotateSession(oldSession: Session, refreshTokenHash: string) {
-    const expiresAtMilliSeconds
-      = Date.now() + env.REFRESH_TOKEN_EXPIRY * 1000
-    const expiresAt = new Date(expiresAtMilliSeconds)
+      return result
+    },
 
-    const newSession: SessionInsertPayload = {
-      userId: oldSession.userId,
-      ipAddress: oldSession.ipAddress,
-      userAgent: oldSession.userAgent,
-      refreshTokenHash,
-      familyId: oldSession.familyId,
-      expiresAt,
-    }
+    async setRevoked(id: number) {
+      const result = await sessionRepository.update(id, { isRevoked: true })
 
-    const result = await SessionRepository.rotateSession(oldSession.id, newSession)
+      if (!result)
+        throw new NotFoundException('Session')
+    },
 
-    return result
-  },
+    async setSessionIsUsed(id: number) {
+      const result = await sessionRepository.update(id, { isUsed: true })
 
-  async setRevoked(id: number) {
-    const result = await SessionRepository.update(id, { isRevoked: true })
+      if (!result)
+        throw new NotFoundException('Session')
 
-    if (!result)
-      throw new NotFoundException('Session')
-  },
-
-  async setSessionIsUsed(id: number) {
-    const result = await SessionRepository.update(id, { isUsed: true })
-
-    if (!result)
-      throw new NotFoundException('Session')
-
-    return result
-  },
+      return result
+    },
+  }
 }

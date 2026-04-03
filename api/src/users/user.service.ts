@@ -1,44 +1,46 @@
 import type { UserInsertPayload, UserUpdatePayload } from '@api/users/user.schema'
+import type { UserRepository } from './user.repository'
 import { NotFoundException } from '@api/lib/errors'
-import { UserRepository } from '@api/users/user.repository'
 
-export const UserService = {
-  async getAll() {
-    const result = await UserRepository.getAll()
+export function UserService(userRepository: typeof UserRepository) {
+  return {
+    async getAll() {
+      const result = await userRepository.getAll()
 
-    return result
-  },
+      return result
+    },
 
-  async getById(id: number) {
-    const result = await UserRepository.getById(id)
+    async getById(id: number) {
+      const result = await userRepository.getById(id)
 
-    if (!result)
-      throw new NotFoundException('User')
+      if (!result)
+        throw new NotFoundException('User')
 
-    return result
-  },
+      return result
+    },
 
-  async create(data: UserInsertPayload) {
-    const result = await UserRepository.create(data)
+    async create(data: UserInsertPayload) {
+      const result = await userRepository.create(data)
 
-    return result
-  },
+      return result
+    },
 
-  async update(id: number, data: UserUpdatePayload) {
-    const result = await UserRepository.update(id, data)
+    async update(id: number, data: UserUpdatePayload) {
+      const result = await userRepository.update(id, data)
 
-    if (!result)
-      throw new NotFoundException('User')
+      if (!result)
+        throw new NotFoundException('User')
 
-    return result
-  },
+      return result
+    },
 
-  async delete(id: number) {
-    const result = await UserRepository.delete(id)
+    async delete(id: number) {
+      const result = await userRepository.delete(id)
 
-    if (!result)
-      throw new NotFoundException('User')
+      if (!result)
+        throw new NotFoundException('User')
 
-    return result
-  },
+      return result
+    },
+  }
 }

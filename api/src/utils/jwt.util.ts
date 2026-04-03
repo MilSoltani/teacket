@@ -1,10 +1,10 @@
+import type { TokenType } from '@api/auth'
 import type { JWTPayload } from 'hono/utils/jwt/types'
-import type { TokenType } from '../../auth/auth.schema'
 import { env } from '@api/env'
 import { UnauthenticatedException } from '@api/lib/errors'
 import { sign, verify } from 'hono/jwt'
 
-export const JwtService = {
+export const JwtUtil = {
   async generate(
     sub: number,
     type: TokenType,

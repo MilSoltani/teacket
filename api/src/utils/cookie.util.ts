@@ -4,7 +4,7 @@ import { env } from '@api/env'
 import { UnauthenticatedException } from '@api/lib/errors'
 import { getCookie, setCookie } from 'hono/cookie'
 
-export const CookieService = {
+export const CookieUtil = {
   async create(
     c: Context,
     name: string,
