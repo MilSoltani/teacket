@@ -13,7 +13,7 @@ export interface ISessionService {
   setSessionIsUsed: (id: number) => Promise<Session>
 }
 
-export function SessionService(sessionRepository: ISessionRepository): ISessionService {
+export function createSessionService(sessionRepository: ISessionRepository): ISessionService {
   return {
     async getSessionByHash(refreshTokenHash: string) {
       const result = await sessionRepository.getSessionByHash(refreshTokenHash)

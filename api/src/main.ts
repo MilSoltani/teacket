@@ -1,4 +1,5 @@
 import { createAuthHandler } from '@api/auth'
+import { db } from '@api/database'
 import { env } from '@api/env'
 import { handleErrors } from '@api/lib/errors'
 import { createUserHandler } from '@api/users'
@@ -12,7 +13,7 @@ import { createContainer } from './di'
 
 const app = new OpenAPIHono()
 
-const container = createContainer()
+const container = createContainer(db)
 
 const authHandler = createAuthHandler({
   authService: container.services.authService,

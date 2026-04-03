@@ -1,7 +1,7 @@
+import type { DbClient } from '@api/database'
 import { createAuthRepository, createAuthService } from '@api/auth'
-import { db } from '@api/database'
-import { createSessionRepository, SessionService as createSessionService } from '@api/sessions'
-import { createUserRepository, UserService as createUserService } from '@api/users'
+import { createSessionRepository, createSessionService } from '@api/sessions'
+import { createUserRepository, createUserService } from '@api/users'
 import { CookieUtil } from '@api/utils/cookie.util'
 import { CryptoUtil } from '@api/utils/crypto.util'
 import { JwtUtil } from '@api/utils/jwt.util'
@@ -9,23 +9,11 @@ import { JwtUtil } from '@api/utils/jwt.util'
 type Repositories = ReturnType<typeof createRepositories>
 type Utilities = ReturnType<typeof createUtilities>
 
-interface Services {
-  userService: ReturnType<typeof createUserService>
-  sessionService: ReturnType<typeof createSessionService>
-  authService: ReturnType<typeof createAuthService>
-}
-
-interface Container {
-  repositories: Repositories
-  utilities: Utilities
-  services: Services
-}
-
-export function createRepositories() {
+export function createRepositories(dbClient: DbClient) {
   return {
-    authRepository: createAuthRepository(db),
-    userRepository: createUserRepository(db),
-    sessionRepository: createSessionRepository(db),
+    authRepository: createAuthRepository(dbClient),
+    userRepository: createUserRepository(dbClient),
+    sessionRepository: createSessionRepository(dbClient),
   }
 }
 
@@ -37,7 +25,12 @@ export function createUtilities() {
   }
 }
 
-export function createServices({ repositories, utilities }: { repositories: Repositories, utilities: Utilities }): Services {
+interface ServiceDeps {
+  repositories: Repositories
+  utilities: Utilities
+}
+
+export function createServices({ repositories, utilities }: ServiceDeps) {
   const sessionService = createSessionService(repositories.sessionRepository)
 
   return {
@@ -52,11 +45,17 @@ export function createServices({ repositories, utilities }: { repositories: Repo
   }
 }
 
-export function createContainer(): Container {
-  const repositories = createRepositories()
+export function createContainer(dbClient: DbClient) {
+  const repositories = createRepositories(dbClient)
   const utilities = createUtilities()
-
   const services = createServices({ repositories, utilities })
 
-  return { repositories, services, utilities }
+  return {
+    repositories,
+    utilities,
+    services,
+  } as const
 }
+
+export type Services = ReturnType<typeof createServices>
+export type Container = ReturnType<typeof createContainer>
