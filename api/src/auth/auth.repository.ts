@@ -9,8 +9,11 @@ export interface IAuthRepository {
   create: (data: SignupPayload, dbContext?: DbContext) => Promise<User>
 }
 
+/** Repository for auth-specific user lookup and creation. */
 export function createAuthRepository(dbClient: DbClient): IAuthRepository {
   return {
+
+    /** Finds a user record for authentication. */
     async getUserForAuth(username: string, dbContext: DbContext = dbClient): Promise<AuthUser | undefined> {
       const result = await dbContext
         .select({
@@ -24,6 +27,7 @@ export function createAuthRepository(dbClient: DbClient): IAuthRepository {
       return result[0] as AuthUser
     },
 
+    /** Creates a new user for signup. */
     async create(data: SignupPayload, dbContext: DbContext = dbClient): Promise<User> {
       const [result] = await dbContext
         .insert(usersTable)

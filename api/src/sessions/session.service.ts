@@ -13,8 +13,11 @@ export interface ISessionService {
   setSessionIsUsed: (id: number) => Promise<Session>
 }
 
+/** Service for session validation and lifecycle management. */
 export function createSessionService(sessionRepository: ISessionRepository): ISessionService {
   return {
+
+    /** Finds a session by refresh token hash. */
     async getSessionByHash(refreshTokenHash: string) {
       const result = await sessionRepository.getSessionByHash(refreshTokenHash)
 
@@ -24,6 +27,7 @@ export function createSessionService(sessionRepository: ISessionRepository): ISe
       return result
     },
 
+    /** Creates a validated session record. */
     async create(data: SessionInsertPayload) {
       const parsedData = SessionInsertSchema.parse(data)
 
@@ -32,6 +36,7 @@ export function createSessionService(sessionRepository: ISessionRepository): ISe
       return result
     },
 
+    /** Rotates an existing session into a new one. */
     async rotateSession(oldSession: Session, refreshTokenHash: string) {
       const expiresAtMilliSeconds
         = Date.now() + env.REFRESH_TOKEN_EXPIRY * 1000
@@ -51,6 +56,7 @@ export function createSessionService(sessionRepository: ISessionRepository): ISe
       return result
     },
 
+    /** Revokes all sessions in a family. */
     async revokeEntireFamily(familyId: string) {
       const result = await sessionRepository.revokeEntireFamily(familyId)
 
@@ -60,6 +66,7 @@ export function createSessionService(sessionRepository: ISessionRepository): ISe
       return result
     },
 
+    /** Marks a session as revoked. */
     async setRevoked(id: number) {
       const result = await sessionRepository.update(id, { isRevoked: true })
 
@@ -67,6 +74,7 @@ export function createSessionService(sessionRepository: ISessionRepository): ISe
         throw new NotFoundException('Session')
     },
 
+    /** Marks a session as used. */
     async setSessionIsUsed(id: number) {
       const result = await sessionRepository.update(id, { isUsed: true })
 

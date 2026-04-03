@@ -11,8 +11,10 @@ export interface IUserRepository {
   delete: (id: number, dbContext?: DbContext) => Promise<User | undefined>
 }
 
+/** Repository for user CRUD operations. */
 export function createUserRepository(dbClient: DbClient): IUserRepository {
   return {
+    /** Returns all public user records. */
     async getAll(dbContext: DbContext = dbClient): Promise<User[]> {
       const result = await dbContext
         .select(publicColumns)
@@ -21,6 +23,7 @@ export function createUserRepository(dbClient: DbClient): IUserRepository {
       return result
     },
 
+    /** Finds a user by id. */
     async getById(id: number, dbContext: DbContext = dbClient): Promise<User | undefined> {
       const [result] = await dbContext
         .select(publicColumns)
@@ -30,6 +33,7 @@ export function createUserRepository(dbClient: DbClient): IUserRepository {
       return result
     },
 
+    /** Creates a user record. */
     async create(data: UserInsertPayload, dbContext: DbContext = dbClient): Promise<User | undefined> {
       const [result] = await dbContext
         .insert(usersTable)
@@ -39,6 +43,7 @@ export function createUserRepository(dbClient: DbClient): IUserRepository {
       return result
     },
 
+    /** Updates a user record. */
     async update(id: number, data: UserUpdatePayload, dbContext: DbContext = dbClient): Promise<User | undefined> {
       const [result] = await dbContext
         .update(usersTable)
@@ -49,6 +54,7 @@ export function createUserRepository(dbClient: DbClient): IUserRepository {
       return result
     },
 
+    /** Deletes a user record. */
     async delete(id: number, dbContext: DbContext = dbClient): Promise<User | undefined> {
       const [result] = await dbContext
         .delete(usersTable)

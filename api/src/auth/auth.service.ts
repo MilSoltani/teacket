@@ -8,6 +8,7 @@ import type { AuthUser, SignupPayload } from './auth.schema'
 import { env } from '@api/env'
 import { ForbiddenException, InvalidCredentialsException, UnauthenticatedException } from '@api/lib/errors'
 
+/** Service for authentication and token handling. */
 export function createAuthService(
   authRepository: IAuthRepository,
   sessionService: ISessionService,
@@ -15,6 +16,8 @@ export function createAuthService(
   jwtUtil: typeof JwtUtil,
 ) {
   return {
+
+    /** Verifies user credentials. */
     async authenticateUser(username: string, password: string): Promise<AuthUser> {
       const user = await authRepository.getUserForAuth(username)
 
@@ -31,6 +34,7 @@ export function createAuthService(
       return user
     },
 
+    /** Creates login tokens and stores a session. */
     async performLogin(authUser: AuthUser, userAgent?: string, ipAddress?: string) {
       const accessToken = await jwtUtil.generate(authUser.id, 'access')
       const refreshToken = await jwtUtil.generate(authUser.id, 'refresh')
@@ -51,6 +55,7 @@ export function createAuthService(
       return { accessToken, refreshToken }
     },
 
+    /** Checks whether a session can still be used. */
     async checkSessionValidity(session: Session) {
       if (session.isRevoked) {
         throw new UnauthenticatedException('Session revoked')
@@ -66,6 +71,7 @@ export function createAuthService(
       }
     },
 
+    /** Refreshes access and refresh tokens. */
     async performRefresh(refreshToken: string) {
       const hashedToken = cryptoUtil.sha256(refreshToken)
       const session = await sessionService.getSessionByHash(hashedToken)
@@ -84,6 +90,7 @@ export function createAuthService(
       return { accessToken: newAccessToken, refreshToken: newRefreshToken }
     },
 
+    /** Creates a user account and initial session. */
     async performSignup(payload: SignupPayload, userAgent?: string, ipAddress?: string): Promise<{ user: User, accessToken: string, refreshToken: string }> {
       const hashedPassword = await cryptoUtil.hash(payload.password)
 

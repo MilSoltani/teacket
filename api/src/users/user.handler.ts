@@ -7,14 +7,17 @@ export interface UserHandlerDeps {
   userService: ReturnType<typeof UserService>
 }
 
+/** Handler for user routes. */
 export function createUserHandler({ userService }: UserHandlerDeps) {
   return new OpenAPIHono()
+    /** Returns all users. */
     .openapi(UserRoutes.getAll, async (c) => {
       const data = await userService.getAll()
       const parsedData = z.array(UserSelectSchema).parse(data)
 
       return c.json(parsedData, 200)
     })
+    /** Returns one user by id. */
     .openapi(UserRoutes.getById, async (c) => {
       const { id } = c.req.valid('param')
 
@@ -23,6 +26,7 @@ export function createUserHandler({ userService }: UserHandlerDeps) {
 
       return c.json(parsedData, 200)
     })
+    /** Creates a user. */
     .openapi(UserRoutes.create, async (c) => {
       const data = c.req.valid('json')
 
@@ -31,6 +35,7 @@ export function createUserHandler({ userService }: UserHandlerDeps) {
 
       return c.json(parsedUser, 201)
     })
+    /** Updates a user. */
     .openapi(UserRoutes.update, async (c) => {
       const { id } = c.req.valid('param')
       const data = c.req.valid('json')
@@ -40,6 +45,7 @@ export function createUserHandler({ userService }: UserHandlerDeps) {
 
       return c.json(parsedData, 200)
     })
+    /** Deletes a user. */
     .openapi(UserRoutes.delete, async (c) => {
       const { id } = c.req.valid('param')
 

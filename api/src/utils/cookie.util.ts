@@ -4,7 +4,9 @@ import { env } from '@api/env'
 import { UnauthenticatedException } from '@api/lib/errors'
 import { getCookie, setCookie } from 'hono/cookie'
 
+/** Cookie helpers for auth tokens. */
 export const CookieUtil = {
+  /** Sets an auth cookie. */
   async create(
     c: Context,
     name: string,
@@ -25,6 +27,7 @@ export const CookieUtil = {
     })
   },
 
+  /** Reads the refresh token cookie. */
   getRefreshToken(c: Context): string {
     const refreshToken = getCookie(c, 'refresh')
 

@@ -4,7 +4,9 @@ import { env } from '@api/env'
 import { UnauthenticatedException } from '@api/lib/errors'
 import { sign, verify } from 'hono/jwt'
 
+/** JWT helpers for access and refresh tokens. */
 export const JwtUtil = {
+  /** Generates a signed JWT. */
   async generate(
     sub: number,
     type: TokenType,
@@ -25,6 +27,7 @@ export const JwtUtil = {
     return await sign(payload, secret, 'HS256')
   },
 
+  /** Verifies a JWT and returns its payload. */
   async verify(token: string, type: 'access' | 'refresh'): Promise<JWTPayload> {
     try {
       const secret = type === 'access'

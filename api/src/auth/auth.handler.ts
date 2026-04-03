@@ -9,13 +9,17 @@ export interface AuthHandlerDeps {
   cookieUtil: typeof CookieUtil
 }
 
+/** Sets auth cookies for the client. */
 function createCookies(c: any, cookieUtil: typeof CookieUtil, accessToken: string, refreshToken: string) {
   cookieUtil.create(c, 'refresh', refreshToken, 'refresh')
   cookieUtil.create(c, 'access', accessToken, 'access')
 }
 
+/** Handler for auth routes. */
 export function createAuthHandler({ authService, cookieUtil }: AuthHandlerDeps) {
   return new OpenAPIHono()
+
+    /** Handles user login. */
     .openapi(AuthRoutes.login, async (c) => {
       const { username, password } = c.req.valid('json')
 
@@ -31,6 +35,8 @@ export function createAuthHandler({ authService, cookieUtil }: AuthHandlerDeps) 
 
       return c.json({ message: 'Login successful' }, 200)
     })
+
+    /** Handles token refresh. */
     .openapi(AuthRoutes.refresh, async (c) => {
       const refreshToken = cookieUtil.getRefreshToken(c)
       const { accessToken, refreshToken: newRefreshToken } = await authService.performRefresh(refreshToken)
@@ -39,6 +45,8 @@ export function createAuthHandler({ authService, cookieUtil }: AuthHandlerDeps) 
 
       return c.json({ message: 'Tokens successfully refreshed' }, 200)
     })
+
+    /** Handles user signup. */
     .openapi(AuthRoutes.signup, async (c) => {
       const payload = c.req.valid('json')
       const userAgent = c.req.header('User-Agent')

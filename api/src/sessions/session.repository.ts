@@ -18,8 +18,10 @@ function hasTransaction(context: DbContext): context is DbClient {
   return typeof (context as DbClient).transaction === 'function'
 }
 
+/** Repository for session lifecycle and token rotation. */
 export function createSessionRepository(dbClient: DbClient): ISessionRepository {
   return {
+    /** Returns all sessions. */
     async getAll(dbContext: DbContext = dbClient): Promise<Session[]> {
       const result = await dbContext
         .select()
@@ -28,6 +30,7 @@ export function createSessionRepository(dbClient: DbClient): ISessionRepository 
       return result
     },
 
+    /** Finds a session by id. */
     async getById(id: number, dbContext: DbContext = dbClient): Promise<Session | undefined> {
       const [result] = await dbContext
         .select()
@@ -37,6 +40,7 @@ export function createSessionRepository(dbClient: DbClient): ISessionRepository 
       return result
     },
 
+    /** Finds a session by refresh token hash. */
     async getSessionByHash(hash: string, dbContext: DbContext = dbClient): Promise<Session | undefined> {
       const [result] = await dbContext
         .select()
@@ -46,6 +50,7 @@ export function createSessionRepository(dbClient: DbClient): ISessionRepository 
       return result
     },
 
+    /** Marks the old session used and creates a replacement session. */
     async rotateSession(oldSessionId: number, newSessionData: SessionInsertPayload, dbContext: DbContext = dbClient) {
       const rotate = async (ctx: DbContext) => {
         await ctx.update(sessionsTable)
@@ -69,6 +74,7 @@ export function createSessionRepository(dbClient: DbClient): ISessionRepository 
       return await rotate(dbContext)
     },
 
+    /** Revokes every session in the same family. */
     async revokeEntireFamily(familyId: string, dbContext: DbContext = dbClient): Promise<Session | undefined> {
       const [result] = await dbContext
         .update(sessionsTable)
@@ -79,6 +85,7 @@ export function createSessionRepository(dbClient: DbClient): ISessionRepository 
       return result
     },
 
+    /** Creates a new session. */
     async create(data: SessionInsertPayload, dbContext: DbContext = dbClient): Promise<Session> {
       const [result] = await dbContext
         .insert(sessionsTable)
@@ -88,6 +95,7 @@ export function createSessionRepository(dbClient: DbClient): ISessionRepository 
       return result
     },
 
+    /** Updates a session. */
     async update(id: number, data: SessionUpdatePayload, dbContext: DbContext = dbClient): Promise<Session | undefined> {
       const [result] = await dbContext
         .update(sessionsTable)
@@ -98,6 +106,7 @@ export function createSessionRepository(dbClient: DbClient): ISessionRepository 
       return result
     },
 
+    /** Deletes a session. */
     async delete(id: number, dbContext: DbContext = dbClient): Promise<Session | undefined> {
       const [result] = await dbContext
         .delete(sessionsTable)
