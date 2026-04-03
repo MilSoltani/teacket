@@ -1,10 +1,25 @@
-import { AuthService, createAuthRepository } from '@api/auth'
+import { createAuthRepository, createAuthService } from '@api/auth'
 import { db } from '@api/database'
-import { createSessionRepository, SessionService } from '@api/sessions'
-import { createUserRepository, UserService } from '@api/users'
+import { createSessionRepository, SessionService as createSessionService } from '@api/sessions'
+import { createUserRepository, UserService as createUserService } from '@api/users'
 import { CookieUtil } from '@api/utils/cookie.util'
 import { CryptoUtil } from '@api/utils/crypto.util'
 import { JwtUtil } from '@api/utils/jwt.util'
+
+type Repositories = ReturnType<typeof createRepositories>
+type Utilities = ReturnType<typeof createUtilities>
+
+interface Services {
+  userService: ReturnType<typeof createUserService>
+  sessionService: ReturnType<typeof createSessionService>
+  authService: ReturnType<typeof createAuthService>
+}
+
+interface Container {
+  repositories: Repositories
+  utilities: Utilities
+  services: Services
+}
 
 export function createRepositories() {
   return {
@@ -22,13 +37,13 @@ export function createUtilities() {
   }
 }
 
-export function createServices(repositories: ReturnType<typeof createRepositories>, utilities: ReturnType<typeof createUtilities>) {
-  const sessionService = SessionService(repositories.sessionRepository)
+export function createServices({ repositories, utilities }: { repositories: Repositories, utilities: Utilities }): Services {
+  const sessionService = createSessionService(repositories.sessionRepository)
 
   return {
-    userService: UserService(repositories.userRepository),
+    userService: createUserService(repositories.userRepository),
     sessionService,
-    authService: AuthService(
+    authService: createAuthService(
       repositories.authRepository,
       sessionService,
       utilities.cryptoUtil,
@@ -37,18 +52,11 @@ export function createServices(repositories: ReturnType<typeof createRepositorie
   }
 }
 
-export function createContainer() {
+export function createContainer(): Container {
   const repositories = createRepositories()
   const utilities = createUtilities()
 
-  const services = createServices(repositories, utilities)
+  const services = createServices({ repositories, utilities })
 
   return { repositories, services, utilities }
-}
-
-export function containerMiddleware(container: ReturnType<typeof createContainer>) {
-  return async (c: any, next: any) => {
-    c.set('container', container)
-    await next()
-  }
 }

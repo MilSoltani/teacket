@@ -8,7 +8,7 @@ import type { AuthUser, SignupPayload } from './auth.schema'
 import { env } from '@api/env'
 import { ForbiddenException, InvalidCredentialsException, UnauthenticatedException } from '@api/lib/errors'
 
-export function AuthService(
+export function createAuthService(
   authRepository: IAuthRepository,
   sessionService: ISessionService,
   cryptoUtil: typeof CryptoUtil,

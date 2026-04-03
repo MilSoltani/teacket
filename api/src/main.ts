@@ -1,26 +1,33 @@
-import type { AppEnvironment } from './lib/types'
-import { AuthHandler } from '@api/auth'
+import { createAuthHandler } from '@api/auth'
 import { env } from '@api/env'
 import { handleErrors } from '@api/lib/errors'
-import { UserHandler } from '@api/users'
+import { createUserHandler } from '@api/users'
 import { serve } from '@hono/node-server'
 import { swaggerUI } from '@hono/swagger-ui'
 import { OpenAPIHono } from '@hono/zod-openapi'
 import { cors } from 'hono/cors'
 import { jwt } from 'hono/jwt'
 import { logger } from 'hono/logger'
-import { containerMiddleware, createContainer } from './di'
+import { createContainer } from './di'
 
-const app = new OpenAPIHono<AppEnvironment>()
+const app = new OpenAPIHono()
 
-const contianer = createContainer()
-app.use(containerMiddleware(contianer))
+const container = createContainer()
+
+const authHandler = createAuthHandler({
+  authService: container.services.authService,
+  cookieUtil: container.utilities.cookieUtil,
+})
+
+const userHandler = createUserHandler({
+  userService: container.services.userService,
+})
 
 app.use(logger())
 app.use('/*', cors())
 app.get('/api/health', c => c.json({ ok: true }))
 
-app.route('/api/auth', AuthHandler)
+app.route('/api/auth', authHandler)
 
 app.use('/api/*', jwt({
   secret: env.JWT_ACCESS_SECRET,
@@ -28,7 +35,7 @@ app.use('/api/*', jwt({
   alg: 'HS256',
 }))
 
-app.route('/api/users', UserHandler)
+app.route('/api/users', userHandler)
 
 app.onError(handleErrors)
 app.notFound(c => c.json({ message: 'Not Found' }, 404))

@@ -1,54 +1,52 @@
-import type { AppEnvironment } from '@api/lib/types'
+import type { UserService } from './user.service'
 import { OpenAPIHono, z } from '@hono/zod-openapi'
 import { UserRoutes } from './user.routes'
 import { UserSelectSchema } from './user.schema'
 
-export const UserHandler = new OpenAPIHono<AppEnvironment>()
-  .openapi(UserRoutes.getAll, async (c) => {
-    const { userService } = c.var.container.services
+export interface UserHandlerDeps {
+  userService: ReturnType<typeof UserService>
+}
 
-    const data = await userService.getAll()
-    const parsedData = z.array(UserSelectSchema).parse(data)
+export function createUserHandler({ userService }: UserHandlerDeps) {
+  return new OpenAPIHono()
+    .openapi(UserRoutes.getAll, async (c) => {
+      const data = await userService.getAll()
+      const parsedData = z.array(UserSelectSchema).parse(data)
 
-    return c.json(parsedData, 200)
-  })
-  .openapi(UserRoutes.getById, async (c) => {
-    const { userService } = c.var.container.services
+      return c.json(parsedData, 200)
+    })
+    .openapi(UserRoutes.getById, async (c) => {
+      const { id } = c.req.valid('param')
 
-    const { id } = c.req.valid('param')
+      const data = await userService.getById(id)
+      const parsedData = UserSelectSchema.parse(data)
 
-    const data = await userService.getById(id)
-    const parsedData = UserSelectSchema.parse(data)
+      return c.json(parsedData, 200)
+    })
+    .openapi(UserRoutes.create, async (c) => {
+      const data = c.req.valid('json')
 
-    return c.json(parsedData, 200)
-  })
-  .openapi(UserRoutes.create, async (c) => {
-    const { userService } = c.var.container.services
+      const user = await userService.create(data)
+      const parsedUser = UserSelectSchema.parse(user)
 
-    const data = c.req.valid('json')
+      return c.json(parsedUser, 201)
+    })
+    .openapi(UserRoutes.update, async (c) => {
+      const { id } = c.req.valid('param')
+      const data = c.req.valid('json')
 
-    const user = await userService.create(data)
-    const parsedUser = UserSelectSchema.parse(user)
+      const updatedUser = await userService.update(id, data)
+      const parsedData = UserSelectSchema.parse(updatedUser)
 
-    return c.json(parsedUser, 201)
-  })
-  .openapi(UserRoutes.update, async (c) => {
-    const { userService } = c.var.container.services
+      return c.json(parsedData, 200)
+    })
+    .openapi(UserRoutes.delete, async (c) => {
+      const { id } = c.req.valid('param')
 
-    const { id } = c.req.valid('param')
-    const data = c.req.valid('json')
+      await userService.delete(id)
 
-    const updatedUser = await userService.update(id, data)
-    const parsedData = UserSelectSchema.parse(updatedUser)
+      return c.body(null, 204)
+    })
+}
 
-    return c.json(parsedData, 200)
-  })
-  .openapi(UserRoutes.delete, async (c) => {
-    const { userService } = c.var.container.services
-
-    const { id } = c.req.valid('param')
-
-    await userService.delete(id)
-
-    return c.body(null, 204)
-  })
+export type UserHandler = ReturnType<typeof createUserHandler>

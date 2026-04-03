@@ -1,54 +1,55 @@
-import type { AppEnvironment } from '@api/lib/types'
+import type { createAuthService } from '@api/auth/auth.service'
+import type { CookieUtil } from '@api/utils/cookie.util'
 import { UserSelectSchema } from '@api/users'
 import { OpenAPIHono } from '@hono/zod-openapi'
 import { AuthRoutes } from './auth.routes'
 
-function createCookies(c: any, accessToken: string, refreshToken: string) {
-  const { cookieUtil } = c.var.container.utilities
+export interface AuthHandlerDeps {
+  authService: ReturnType<typeof createAuthService>
+  cookieUtil: typeof CookieUtil
+}
 
+function createCookies(c: any, cookieUtil: typeof CookieUtil, accessToken: string, refreshToken: string) {
   cookieUtil.create(c, 'refresh', refreshToken, 'refresh')
   cookieUtil.create(c, 'access', accessToken, 'access')
 }
 
-export const AuthHandler = new OpenAPIHono<AppEnvironment>()
-  .openapi(AuthRoutes.login, async (c) => {
-    const { authService } = c.var.container.services
+export function createAuthHandler({ authService, cookieUtil }: AuthHandlerDeps) {
+  return new OpenAPIHono()
+    .openapi(AuthRoutes.login, async (c) => {
+      const { username, password } = c.req.valid('json')
 
-    const { username, password } = c.req.valid('json')
+      const authUser = await authService.authenticateUser(username, password)
 
-    const authUser = await authService.authenticateUser(username, password)
+      const { accessToken, refreshToken } = await authService.performLogin(
+        authUser,
+        c.req.header('User-Agent'),
+        c.req.header('x-forwarded-for')?.split(',')[0],
+      )
 
-    const { accessToken, refreshToken } = await authService.performLogin(
-      authUser,
-      c.req.header('User-Agent'),
-      c.req.header('x-forwarded-for')?.split(',')[0],
-    )
+      createCookies(c, cookieUtil, accessToken, refreshToken)
 
-    createCookies(c, accessToken, refreshToken)
+      return c.json({ message: 'Login successful' }, 200)
+    })
+    .openapi(AuthRoutes.refresh, async (c) => {
+      const refreshToken = cookieUtil.getRefreshToken(c)
+      const { accessToken, refreshToken: newRefreshToken } = await authService.performRefresh(refreshToken)
 
-    return c.json({ message: 'Login successful' }, 200)
-  })
-  .openapi(AuthRoutes.refresh, async (c) => {
-    const { authService } = c.var.container.services
-    const { cookieUtil } = c.var.container.utilities
+      createCookies(c, cookieUtil, accessToken, newRefreshToken)
 
-    const refreshToken = cookieUtil.getRefreshToken(c)
-    const { accessToken, refreshToken: newRefreshToken } = await authService.performRefresh(refreshToken)
+      return c.json({ message: 'Tokens successfully refreshed' }, 200)
+    })
+    .openapi(AuthRoutes.signup, async (c) => {
+      const payload = c.req.valid('json')
+      const userAgent = c.req.header('User-Agent')
+      const ipAddress = c.req.header('x-forwarded-for')?.split(',')[0]
 
-    createCookies(c, accessToken, newRefreshToken)
+      const { user, accessToken, refreshToken } = await authService.performSignup(payload, userAgent, ipAddress)
 
-    return c.json({ message: 'Tokens successfully refreshed' }, 200)
-  })
-  .openapi(AuthRoutes.signup, async (c) => {
-    const { authService } = c.var.container.services
+      createCookies(c, cookieUtil, accessToken, refreshToken)
 
-    const payload = c.req.valid('json')
-    const userAgent = c.req.header('User-Agent')
-    const ipAddress = c.req.header('x-forwarded-for')?.split(',')[0]
+      return c.json(UserSelectSchema.parse(user), 201)
+    })
+}
 
-    const { user, accessToken, refreshToken } = await authService.performSignup(payload, userAgent, ipAddress)
-
-    createCookies(c, accessToken, refreshToken)
-
-    return c.json(UserSelectSchema.parse(user), 201)
-  })
+export type AuthHandler = ReturnType<typeof createAuthHandler>
