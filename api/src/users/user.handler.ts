@@ -1,10 +1,10 @@
-import type { UserService } from './user.service'
+import type { createUserService } from './user.service'
 import { OpenAPIHono, z } from '@hono/zod-openapi'
 import { UserRoutes } from './user.routes'
 import { UserSelectSchema } from './user.schema'
 
 export interface UserHandlerDeps {
-  userService: ReturnType<typeof UserService>
+  userService: ReturnType<typeof createUserService>
 }
 
 /** Handler for user routes. */

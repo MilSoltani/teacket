@@ -1,6 +1,9 @@
 import type { UserInsertPayload } from './user.schema'
+import { db } from '@api/database'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import { UserRepository } from './user.repository'
+import { createUserRepository } from './user.repository'
+
+const UserRepository = createUserRepository(db)
 
 describe('usersRepository', () => {
   const NON_EXISTENT_USER_ID = 999

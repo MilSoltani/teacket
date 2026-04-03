@@ -1,10 +1,15 @@
 import type { UserInsertPayload } from '@api/users'
 import type { SessionInsertPayload } from './session.schema'
-import { UserRepository } from '@api/users'
+import { db } from '@api/database'
+import { createUserRepository } from '@api/users'
 import { CryptoUtil } from '@api/utils/crypto.util'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import { SessionRepository } from './session.repository'
-import { SessionService } from './session.service'
+import { createSessionRepository } from './session.repository'
+import { createSessionService } from './session.service'
+
+const UserRepository = createUserRepository(db)
+const SessionRepository = createSessionRepository(db)
+const SessionService = createSessionService(SessionRepository)
 
 describe('sessionsRepository', () => {
   const NON_EXISTENT_SESSION_ID = 999

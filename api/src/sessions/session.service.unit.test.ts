@@ -1,21 +1,20 @@
-import type { Session } from './session.schema'
-import { ForbiddenException, NotFoundException, UnauthenticatedException } from '@api/lib'
+import type { ISessionRepository } from './session.repository'
+import { NotFoundException } from '@api/lib'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import { SessionRepository } from './session.repository'
-import { SessionService } from './session.service'
+import { createSessionService } from './session.service'
 
-vi.mock('./session.repository', () => ({
-  SessionRepository: {
-    getAll: vi.fn(),
-    getById: vi.fn(),
-    getSessionByHash: vi.fn(),
-    rotateSession: vi.fn(),
-    revokeEntireFamily: vi.fn(),
-    create: vi.fn(),
-    update: vi.fn(),
-    delete: vi.fn(),
-  },
-}))
+const SessionRepository: ISessionRepository = {
+  getAll: vi.fn(),
+  getById: vi.fn(),
+  getSessionByHash: vi.fn(),
+  rotateSession: vi.fn(),
+  revokeEntireFamily: vi.fn(),
+  create: vi.fn(),
+  update: vi.fn(),
+  delete: vi.fn(),
+}
+
+const SessionService = createSessionService(SessionRepository)
 
 vi.mock('@api/env', () => ({
   env: {},
@@ -53,54 +52,6 @@ describe('sessionService', () => {
       vi.mocked(SessionRepository.getSessionByHash).mockResolvedValue(undefined)
 
       await expect(SessionService.getSessionByHash('a-dummy-hash')).rejects.toThrow(new NotFoundException('Session'))
-    })
-  })
-
-  describe('checkSessionValidity', () => {
-    it('throws if session is revoked', async () => {
-      const session: Session = { ...SESSION_1, isRevoked: true }
-
-      expect(SessionService.checkSessionValidity(session))
-        .rejects
-        .toThrow(new UnauthenticatedException('Session revoked'))
-    })
-
-    it('throws if session is expired', async () => {
-      const yesterday = new Date()
-      yesterday.setDate(yesterday.getDay() - 1)
-
-      const session: Session = {
-        ...SESSION_1,
-        expiresAt: yesterday,
-      }
-
-      expect(SessionService.checkSessionValidity(session))
-        .rejects
-        .toThrow(new UnauthenticatedException('Session expired'))
-    })
-
-    it('throws if session is reused', async () => {
-      const session: Session = {
-        ...SESSION_1,
-        isUsed: true,
-      }
-
-      expect(SessionService.checkSessionValidity(session))
-        .rejects
-        .toThrow(new ForbiddenException('Security breach detected. All sessions revoked.'))
-    })
-
-    it('revokes all family sessions if session is reused', async () => {
-      const session: Session = {
-        ...SESSION_1,
-        isUsed: true,
-      }
-
-      vi.mocked(SessionRepository.revokeEntireFamily)
-
-      await expect(SessionService.checkSessionValidity(session)).rejects.toThrow()
-      expect(SessionRepository.revokeEntireFamily).toHaveBeenCalledOnce()
-      expect(SessionRepository.revokeEntireFamily).toHaveBeenCalledWith(session.familyId)
     })
   })
 

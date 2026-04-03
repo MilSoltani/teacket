@@ -1,18 +1,18 @@
+import type { IUserRepository } from './user.repository'
 import type { User } from './user.schema'
 import { NotFoundException } from '@api/lib/errors'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import { UserRepository } from './user.repository'
-import { UserService } from './user.service'
+import { createUserService } from './user.service'
 
-vi.mock('./user.repository', () => ({
-  UserRepository: {
-    getAll: vi.fn(),
-    getById: vi.fn(),
-    create: vi.fn(),
-    update: vi.fn(),
-    delete: vi.fn(),
-  },
-}))
+const UserRepository: IUserRepository = {
+  getAll: vi.fn(),
+  getById: vi.fn(),
+  create: vi.fn(),
+  update: vi.fn(),
+  delete: vi.fn(),
+}
+
+const UserService = createUserService(UserRepository)
 
 describe('userService', () => {
   const NON_EXISTENT_USER_ID = 999
