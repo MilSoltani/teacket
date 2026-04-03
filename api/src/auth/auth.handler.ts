@@ -4,7 +4,7 @@ import { OpenAPIHono } from '@hono/zod-openapi'
 import { AuthRoutes } from './auth.routes'
 
 function createCookies(c: any, accessToken: string, refreshToken: string) {
-  const { cookie: cookieUtil } = c.var.container.utilities
+  const { cookieUtil } = c.var.container.utilities
 
   cookieUtil.create(c, 'refresh', refreshToken, 'refresh')
   cookieUtil.create(c, 'access', accessToken, 'access')
@@ -12,7 +12,7 @@ function createCookies(c: any, accessToken: string, refreshToken: string) {
 
 export const AuthHandler = new OpenAPIHono<AppEnvironment>()
   .openapi(AuthRoutes.login, async (c) => {
-    const { auth: authService } = c.var.container.services
+    const { authService } = c.var.container.services
 
     const { username, password } = c.req.valid('json')
 
@@ -29,8 +29,8 @@ export const AuthHandler = new OpenAPIHono<AppEnvironment>()
     return c.json({ message: 'Login successful' }, 200)
   })
   .openapi(AuthRoutes.refresh, async (c) => {
-    const { auth: authService } = c.var.container.services
-    const { cookie: cookieUtil } = c.var.container.utilities
+    const { authService } = c.var.container.services
+    const { cookieUtil } = c.var.container.utilities
 
     const refreshToken = cookieUtil.getRefreshToken(c)
     const { accessToken, refreshToken: newRefreshToken } = await authService.performRefresh(refreshToken)
@@ -40,7 +40,7 @@ export const AuthHandler = new OpenAPIHono<AppEnvironment>()
     return c.json({ message: 'Tokens successfully refreshed' }, 200)
   })
   .openapi(AuthRoutes.signup, async (c) => {
-    const { auth: authService } = c.var.container.services
+    const { authService } = c.var.container.services
 
     const payload = c.req.valid('json')
     const userAgent = c.req.header('User-Agent')

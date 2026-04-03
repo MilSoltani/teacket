@@ -1,8 +1,8 @@
 import type { UserInsertPayload, UserUpdatePayload } from '@api/users/user.schema'
-import type { UserRepository } from './user.repository'
+import type { IUserRepository } from './user.repository'
 import { NotFoundException } from '@api/lib/errors'
 
-export function UserService(userRepository: typeof UserRepository) {
+export function UserService(userRepository: IUserRepository) {
   return {
     async getAll() {
       const result = await userRepository.getAll()

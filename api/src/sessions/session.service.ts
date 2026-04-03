@@ -1,10 +1,19 @@
-import type { SessionRepository } from './session.repository'
+import type { ISessionRepository } from './session.repository'
 import type { Session, SessionInsertPayload } from './session.schema'
 import { env } from '@api/env'
 import { NotFoundException } from '@api/lib/errors'
 import { SessionInsertSchema } from './session.schema'
 
-export function SessionService(sessionRepository: typeof SessionRepository) {
+export interface ISessionService {
+  getSessionByHash: (refreshTokenHash: string) => Promise<Session>
+  create: (data: SessionInsertPayload) => Promise<Session>
+  rotateSession: (oldSession: Session, refreshTokenHash: string) => Promise<unknown>
+  revokeEntireFamily: (familyId: string) => Promise<Session>
+  setRevoked: (id: number) => Promise<void>
+  setSessionIsUsed: (id: number) => Promise<Session>
+}
+
+export function SessionService(sessionRepository: ISessionRepository): ISessionService {
   return {
     async getSessionByHash(refreshTokenHash: string) {
       const result = await sessionRepository.getSessionByHash(refreshTokenHash)
@@ -38,6 +47,15 @@ export function SessionService(sessionRepository: typeof SessionRepository) {
       }
 
       const result = await sessionRepository.rotateSession(oldSession.id, newSession)
+
+      return result
+    },
+
+    async revokeEntireFamily(familyId: string) {
+      const result = await sessionRepository.revokeEntireFamily(familyId)
+
+      if (!result)
+        throw new NotFoundException('Session')
 
       return result
     },

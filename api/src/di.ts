@@ -1,39 +1,38 @@
-import { AuthRepository, AuthService } from '@api/auth'
-import { SessionRepository, SessionService } from '@api/sessions'
-import { UserRepository, UserService } from '@api/users'
+import { AuthService, createAuthRepository } from '@api/auth'
+import { db } from '@api/database'
+import { createSessionRepository, SessionService } from '@api/sessions'
+import { createUserRepository, UserService } from '@api/users'
 import { CookieUtil } from '@api/utils/cookie.util'
 import { CryptoUtil } from '@api/utils/crypto.util'
 import { JwtUtil } from '@api/utils/jwt.util'
 
 export function createRepositories() {
   return {
-    auth: AuthRepository,
-    user: UserRepository,
-    session: SessionRepository,
+    authRepository: createAuthRepository(db),
+    userRepository: createUserRepository(db),
+    sessionRepository: createSessionRepository(db),
   }
 }
 
 export function createUtilities() {
   return {
-    crypto: CryptoUtil,
-    jwt: JwtUtil,
-    cookie: CookieUtil,
+    cryptoUtil: CryptoUtil,
+    jwtUtil: JwtUtil,
+    cookieUtil: CookieUtil,
   }
 }
 
 export function createServices(repositories: ReturnType<typeof createRepositories>, utilities: ReturnType<typeof createUtilities>) {
-  const session = SessionService(repositories.session)
+  const sessionService = SessionService(repositories.sessionRepository)
 
   return {
-    user: UserService(repositories.user),
-    session,
-    auth: AuthService(
-      repositories.auth,
-      repositories.session,
-      utilities.crypto,
-      utilities.jwt,
-      utilities.cookie,
-      session,
+    userService: UserService(repositories.userRepository),
+    sessionService,
+    authService: AuthService(
+      repositories.authRepository,
+      sessionService,
+      utilities.cryptoUtil,
+      utilities.jwtUtil,
     ),
   }
 }

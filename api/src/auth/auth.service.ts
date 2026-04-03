@@ -1,21 +1,18 @@
-import type { Session, SessionRepository, SessionService } from '@api/sessions'
+import type { ISessionService, Session } from '@api/sessions'
 import type { User } from '@api/users'
-import type { CookieUtil } from '@api/utils/cookie.util'
 import type { CryptoUtil } from '@api/utils/crypto.util'
 import type { JwtUtil } from '@api/utils/jwt.util'
 
-import type { AuthRepository } from './auth.repository'
+import type { IAuthRepository } from './auth.repository'
 import type { AuthUser, SignupPayload } from './auth.schema'
 import { env } from '@api/env'
 import { ForbiddenException, InvalidCredentialsException, UnauthenticatedException } from '@api/lib/errors'
 
 export function AuthService(
-  authRepository: typeof AuthRepository,
-  sessionRepository: typeof SessionRepository,
+  authRepository: IAuthRepository,
+  sessionService: ISessionService,
   cryptoUtil: typeof CryptoUtil,
   jwtUtil: typeof JwtUtil,
-  cookieUtil: typeof CookieUtil,
-  sessionService: ReturnType<typeof SessionService>,
 ) {
   return {
     async authenticateUser(username: string, password: string): Promise<AuthUser> {
@@ -42,7 +39,7 @@ export function AuthService(
       const familyId = cryptoUtil.genUuid()
       const expiresAt = new Date(Date.now() + env.REFRESH_TOKEN_EXPIRY * 1000)
 
-      await sessionRepository.create({
+      await sessionService.create({
         userId: authUser.id,
         refreshTokenHash,
         userAgent,
@@ -59,12 +56,12 @@ export function AuthService(
         throw new UnauthenticatedException('Session revoked')
       }
 
-      if (new Date() <= session.expiresAt) {
+      if (new Date() >= session.expiresAt) {
         throw new UnauthenticatedException('Session expired')
       }
 
       if (session.isUsed) {
-        await sessionRepository.revokeEntireFamily(session.familyId)
+        await sessionService.revokeEntireFamily(session.familyId)
         throw new ForbiddenException('Security breach detected. All sessions revoked.')
       }
     },

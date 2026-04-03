@@ -1,51 +1,61 @@
+import type { DbClient, DbContext } from '@api/database'
 import type { User, UserInsertPayload, UserUpdatePayload } from './user.schema'
-import { db } from '@api/database'
 import { eq } from 'drizzle-orm'
 import { publicColumns, usersTable } from './user.schema'
 
-export const UserRepository = {
-  async getAll(): Promise<User[]> {
-    const result = await db
-      .select(publicColumns)
-      .from(usersTable)
+export interface IUserRepository {
+  getAll: (dbContext?: DbContext) => Promise<User[]>
+  getById: (id: number, dbContext?: DbContext) => Promise<User | undefined>
+  create: (data: UserInsertPayload, dbContext?: DbContext) => Promise<User | undefined>
+  update: (id: number, data: UserUpdatePayload, dbContext?: DbContext) => Promise<User | undefined>
+  delete: (id: number, dbContext?: DbContext) => Promise<User | undefined>
+}
 
-    return result
-  },
+export function createUserRepository(dbClient: DbClient): IUserRepository {
+  return {
+    async getAll(dbContext: DbContext = dbClient): Promise<User[]> {
+      const result = await dbContext
+        .select(publicColumns)
+        .from(usersTable)
 
-  async getById(id: number): Promise<User | undefined> {
-    const [result] = await db
-      .select(publicColumns)
-      .from(usersTable)
-      .where(eq(usersTable.id, id))
+      return result
+    },
 
-    return result
-  },
+    async getById(id: number, dbContext: DbContext = dbClient): Promise<User | undefined> {
+      const [result] = await dbContext
+        .select(publicColumns)
+        .from(usersTable)
+        .where(eq(usersTable.id, id))
 
-  async create(data: UserInsertPayload): Promise<User | undefined> {
-    const [result] = await db
-      .insert(usersTable)
-      .values(data)
-      .returning(publicColumns)
+      return result
+    },
 
-    return result
-  },
+    async create(data: UserInsertPayload, dbContext: DbContext = dbClient): Promise<User | undefined> {
+      const [result] = await dbContext
+        .insert(usersTable)
+        .values(data)
+        .returning(publicColumns)
 
-  async update(id: number, data: UserUpdatePayload): Promise<User | undefined> {
-    const [result] = await db
-      .update(usersTable)
-      .set({ ...data, updatedAt: new Date() })
-      .where(eq(usersTable.id, id))
-      .returning(publicColumns)
+      return result
+    },
 
-    return result
-  },
+    async update(id: number, data: UserUpdatePayload, dbContext: DbContext = dbClient): Promise<User | undefined> {
+      const [result] = await dbContext
+        .update(usersTable)
+        .set({ ...data, updatedAt: new Date() })
+        .where(eq(usersTable.id, id))
+        .returning(publicColumns)
 
-  async delete(id: number): Promise<User | undefined> {
-    const [result] = await db
-      .delete(usersTable)
-      .where(eq(usersTable.id, id))
-      .returning(publicColumns)
+      return result
+    },
 
-    return result
-  },
+    async delete(id: number, dbContext: DbContext = dbClient): Promise<User | undefined> {
+      const [result] = await dbContext
+        .delete(usersTable)
+        .where(eq(usersTable.id, id))
+        .returning(publicColumns)
+
+      return result
+    },
+  }
 }

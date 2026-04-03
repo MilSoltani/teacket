@@ -5,7 +5,7 @@ import { UserSelectSchema } from './user.schema'
 
 export const UserHandler = new OpenAPIHono<AppEnvironment>()
   .openapi(UserRoutes.getAll, async (c) => {
-    const { user: userService } = c.var.container.services
+    const { userService } = c.var.container.services
 
     const data = await userService.getAll()
     const parsedData = z.array(UserSelectSchema).parse(data)
@@ -13,7 +13,7 @@ export const UserHandler = new OpenAPIHono<AppEnvironment>()
     return c.json(parsedData, 200)
   })
   .openapi(UserRoutes.getById, async (c) => {
-    const { user: userService } = c.var.container.services
+    const { userService } = c.var.container.services
 
     const { id } = c.req.valid('param')
 
@@ -23,7 +23,7 @@ export const UserHandler = new OpenAPIHono<AppEnvironment>()
     return c.json(parsedData, 200)
   })
   .openapi(UserRoutes.create, async (c) => {
-    const { user: userService } = c.var.container.services
+    const { userService } = c.var.container.services
 
     const data = c.req.valid('json')
 
@@ -33,7 +33,7 @@ export const UserHandler = new OpenAPIHono<AppEnvironment>()
     return c.json(parsedUser, 201)
   })
   .openapi(UserRoutes.update, async (c) => {
-    const { user: userService } = c.var.container.services
+    const { userService } = c.var.container.services
 
     const { id } = c.req.valid('param')
     const data = c.req.valid('json')
@@ -44,7 +44,7 @@ export const UserHandler = new OpenAPIHono<AppEnvironment>()
     return c.json(parsedData, 200)
   })
   .openapi(UserRoutes.delete, async (c) => {
-    const { user: userService } = c.var.container.services
+    const { userService } = c.var.container.services
 
     const { id } = c.req.valid('param')
 

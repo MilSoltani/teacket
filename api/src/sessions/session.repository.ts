@@ -1,87 +1,110 @@
+import type { DbClient, DbContext } from '@api/database'
 import type { Session, SessionInsertPayload, SessionUpdatePayload } from './session.schema'
-import { db } from '@api/database'
 import { eq } from 'drizzle-orm'
 import { sessionsTable } from './session.schema'
 
-export const SessionRepository = {
-  async getAll(): Promise<Session[]> {
-    const result = await db
-      .select()
-      .from(sessionsTable)
+export interface ISessionRepository {
+  getAll: (dbContext?: DbContext) => Promise<Session[]>
+  getById: (id: number, dbContext?: DbContext) => Promise<Session | undefined>
+  getSessionByHash: (hash: string, dbContext?: DbContext) => Promise<Session | undefined>
+  rotateSession: (oldSessionId: number, newSessionData: SessionInsertPayload, dbContext?: DbContext) => Promise<unknown>
+  revokeEntireFamily: (familyId: string, dbContext?: DbContext) => Promise<Session | undefined>
+  create: (data: SessionInsertPayload, dbContext?: DbContext) => Promise<Session>
+  update: (id: number, data: SessionUpdatePayload, dbContext?: DbContext) => Promise<Session | undefined>
+  delete: (id: number, dbContext?: DbContext) => Promise<Session | undefined>
+}
 
-    return result
-  },
+function hasTransaction(context: DbContext): context is DbClient {
+  return typeof (context as DbClient).transaction === 'function'
+}
 
-  async getById(id: number): Promise<Session | undefined> {
-    const [result] = await db
-      .select()
-      .from(sessionsTable)
-      .where(eq(sessionsTable.id, id))
+export function createSessionRepository(dbClient: DbClient): ISessionRepository {
+  return {
+    async getAll(dbContext: DbContext = dbClient): Promise<Session[]> {
+      const result = await dbContext
+        .select()
+        .from(sessionsTable)
 
-    return result
-  },
+      return result
+    },
 
-  async getSessionByHash(hash: string): Promise<Session | undefined> {
-    const [result] = await db
-      .select()
-      .from(sessionsTable)
-      .where(eq(sessionsTable.refreshTokenHash, hash))
+    async getById(id: number, dbContext: DbContext = dbClient): Promise<Session | undefined> {
+      const [result] = await dbContext
+        .select()
+        .from(sessionsTable)
+        .where(eq(sessionsTable.id, id))
 
-    return result
-  },
+      return result
+    },
 
-  async rotateSession(oldSessionId: number, newSessionData: SessionInsertPayload) {
-    return await db.transaction(async (tx) => {
-      await tx.update(sessionsTable)
-        .set({ isUsed: true })
-        .where(eq(sessionsTable.id, oldSessionId))
+    async getSessionByHash(hash: string, dbContext: DbContext = dbClient): Promise<Session | undefined> {
+      const [result] = await dbContext
+        .select()
+        .from(sessionsTable)
+        .where(eq(sessionsTable.refreshTokenHash, hash))
 
-      return await tx.insert(sessionsTable).values({
-        userId: newSessionData.userId,
-        refreshTokenHash: newSessionData.refreshTokenHash,
-        familyId: newSessionData.familyId,
-        userAgent: newSessionData.userAgent,
-        ipAddress: newSessionData.ipAddress,
-        expiresAt: newSessionData.expiresAt,
-      })
-    })
-  },
+      return result
+    },
 
-  async revokeEntireFamily(familyId: string): Promise<Session | undefined> {
-    const [result] = await db
-      .update(sessionsTable)
-      .set({ isRevoked: true })
-      .where(eq(sessionsTable.familyId, familyId))
-      .returning()
+    async rotateSession(oldSessionId: number, newSessionData: SessionInsertPayload, dbContext: DbContext = dbClient) {
+      const rotate = async (ctx: DbContext) => {
+        await ctx.update(sessionsTable)
+          .set({ isUsed: true })
+          .where(eq(sessionsTable.id, oldSessionId))
 
-    return result
-  },
+        return await ctx.insert(sessionsTable).values({
+          userId: newSessionData.userId,
+          refreshTokenHash: newSessionData.refreshTokenHash,
+          familyId: newSessionData.familyId,
+          userAgent: newSessionData.userAgent,
+          ipAddress: newSessionData.ipAddress,
+          expiresAt: newSessionData.expiresAt,
+        })
+      }
 
-  async create(data: SessionInsertPayload): Promise<Session> {
-    const [result] = await db
-      .insert(sessionsTable)
-      .values({ ...data })
-      .returning()
+      if (hasTransaction(dbContext)) {
+        return await dbContext.transaction(async tx => rotate(tx))
+      }
 
-    return result
-  },
+      return await rotate(dbContext)
+    },
 
-  async update(id: number, data: SessionUpdatePayload): Promise<Session | undefined> {
-    const [result] = await db
-      .update(sessionsTable)
-      .set({ ...data, updatedAt: new Date() })
-      .where(eq(sessionsTable.id, id))
-      .returning()
+    async revokeEntireFamily(familyId: string, dbContext: DbContext = dbClient): Promise<Session | undefined> {
+      const [result] = await dbContext
+        .update(sessionsTable)
+        .set({ isRevoked: true })
+        .where(eq(sessionsTable.familyId, familyId))
+        .returning()
 
-    return result
-  },
+      return result
+    },
 
-  async delete(id: number): Promise<Session | undefined> {
-    const [result] = await db
-      .delete(sessionsTable)
-      .where(eq(sessionsTable.id, id))
-      .returning()
+    async create(data: SessionInsertPayload, dbContext: DbContext = dbClient): Promise<Session> {
+      const [result] = await dbContext
+        .insert(sessionsTable)
+        .values({ ...data })
+        .returning()
 
-    return result
-  },
+      return result
+    },
+
+    async update(id: number, data: SessionUpdatePayload, dbContext: DbContext = dbClient): Promise<Session | undefined> {
+      const [result] = await dbContext
+        .update(sessionsTable)
+        .set({ ...data, updatedAt: new Date() })
+        .where(eq(sessionsTable.id, id))
+        .returning()
+
+      return result
+    },
+
+    async delete(id: number, dbContext: DbContext = dbClient): Promise<Session | undefined> {
+      const [result] = await dbContext
+        .delete(sessionsTable)
+        .where(eq(sessionsTable.id, id))
+        .returning()
+
+      return result
+    },
+  }
 }

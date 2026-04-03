@@ -1,29 +1,36 @@
+import type { DbClient, DbContext } from '@api/database'
 import type { User } from '@api/users'
 import type { AuthUser, SignupPayload } from './auth.schema'
-import { db } from '@api/database'
 import { publicColumns, usersTable } from '@api/users'
 import { eq } from 'drizzle-orm'
 
-export const AuthRepository = {
-  async getUserForAuth(username: string): Promise<AuthUser | undefined> {
-    const result = await db
-      .select({
-        id: usersTable.id,
-        username: usersTable.username,
-        password: usersTable.password,
-      })
-      .from(usersTable)
-      .where(eq(usersTable.username, username))
+export interface IAuthRepository {
+  getUserForAuth: (username: string, dbContext?: DbContext) => Promise<AuthUser | undefined>
+  create: (data: SignupPayload, dbContext?: DbContext) => Promise<User>
+}
 
-    return result[0] as AuthUser
-  },
+export function createAuthRepository(dbClient: DbClient): IAuthRepository {
+  return {
+    async getUserForAuth(username: string, dbContext: DbContext = dbClient): Promise<AuthUser | undefined> {
+      const result = await dbContext
+        .select({
+          id: usersTable.id,
+          username: usersTable.username,
+          password: usersTable.password,
+        })
+        .from(usersTable)
+        .where(eq(usersTable.username, username))
 
-  async create(data: SignupPayload): Promise<User> {
-    const [result] = await db
-      .insert(usersTable)
-      .values(data)
-      .returning(publicColumns)
+      return result[0] as AuthUser
+    },
 
-    return result
-  },
+    async create(data: SignupPayload, dbContext: DbContext = dbClient): Promise<User> {
+      const [result] = await dbContext
+        .insert(usersTable)
+        .values(data)
+        .returning(publicColumns)
+
+      return result
+    },
+  }
 }
